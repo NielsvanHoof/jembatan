@@ -59,9 +59,9 @@ export default async function HomePage({ params }: HomePageProps) {
         <h1 className="landing__brand">Jembatan</h1>
 
         {/* Signature: language bridge connecting ID and NL */}
-        <div className="landing__bridge" aria-hidden="true">
+        <div className="bridge-mark" aria-hidden="true">
           <span>ID</span>
-          <span className="landing__bridge-line" />
+          <span className="bridge-mark__line" />
           <span>NL</span>
         </div>
 

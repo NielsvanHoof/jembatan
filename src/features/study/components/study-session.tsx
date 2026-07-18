@@ -9,7 +9,6 @@ import {
   getHabitSummary,
   reviewCardAction,
 } from "@/features/study/actions";
-import type { DeckSummary } from "@/features/study/lib/decks";
 import {
   countPendingReviews,
   enqueuePendingReview,
@@ -20,7 +19,11 @@ import {
   isNetworkFailure,
 } from "@/features/study/lib/offline-sync";
 import { partitionDeckTags } from "@/features/study/lib/themes";
-import type { HabitSummary, StudyCard } from "@/features/study/types";
+import type {
+  DeckSummary,
+  HabitSummary,
+  StudyCard,
+} from "@/features/study/types";
 import { nextDueLabel } from "@/lib/habit";
 import type { Dictionary, Locale } from "@/lib/i18n/dictionaries";
 import { pathFor } from "@/lib/i18n/paths";
@@ -121,6 +124,22 @@ function applyLocalQueue(
   return rest;
 }
 
+/** Compact ID ↔ NL label for the stage bar when filters are collapsed. */
+function directionShort(direction: StudyDirection) {
+  return direction === "id_to_nl" ? "ID → NL" : "NL → ID";
+}
+
+/** Signature bridge — shown on done / empty emotional peaks. */
+function BridgeMark() {
+  return (
+    <div className="bridge-mark bridge-mark--compact" aria-hidden="true">
+      <span>ID</span>
+      <span className="bridge-mark__line" />
+      <span>NL</span>
+    </div>
+  );
+}
+
 /** One-card-at-a-time study loop with flip + SM-2 ratings. */
 export function StudySession({
   initialCards,
@@ -155,6 +174,8 @@ export function StudySession({
   const [offline, setOffline] = useState(false);
   // Play rise-in once on mount; filter switches must not re-animate.
   const [animateIn, setAnimateIn] = useState(true);
+  // Card-forward: filters stay collapsed by default — including the done state.
+  const [filtersOpen, setFiltersOpen] = useState(false);
 
   const current = queue[0];
   const remaining = queue.length;
@@ -270,6 +291,8 @@ export function StudySession({
         setHabit(nextHabit);
         setReviewedToday(nextHabit.reviewedToday);
         setRevealed(false);
+        // New queue (or empty) — keep chrome tucked so the message leads.
+        setFiltersOpen(false);
 
         replaceStudyUrl(locale, {
           deckSlug,
@@ -300,6 +323,8 @@ export function StudySession({
       setError(null);
 
       const advanceLocal = () => {
+        // After a rating, collapse filters so the next card owns the screen.
+        setFiltersOpen(false);
         setReviewedToday((n) => n + 1);
         setRevealed(false);
         setQueue((prev) => applyLocalQueue(prev, current, rating));
@@ -355,132 +380,166 @@ export function StudySession({
         </p>
       ) : null}
 
-      <div className="habit-strip" aria-live="polite">
-        <span>{dict.habitDue.replace("{n}", String(habit.dueNow))}</span>
-        <span aria-hidden="true">·</span>
-        <span>
-          {dict.habitToday
-            .replace("{done}", String(reviewedToday))
-            .replace("{goal}", String(habit.dailyGoal))}
-        </span>
-        <span aria-hidden="true">·</span>
-        <span>
-          {habit.streakDays > 0
-            ? dict.habitStreak.replace("{n}", String(habit.streakDays))
-            : goalMet
-              ? dict.habitGoalMet
-              : dict.habitStreak.replace("{n}", "0")}
-        </span>
-      </div>
-
-      {/* Deck picker */}
-      {decks.length > 1 ? (
-        <fieldset className="deck-toggle" disabled={filtersLocked || pending}>
-          <legend className="sr-only">{dict.deckLegend}</legend>
-          {decks.map((deck) => (
-            <button
-              key={deck.slug}
-              type="button"
-              className={
-                deckSlug === deck.slug
-                  ? "deck-toggle__btn is-active"
-                  : "deck-toggle__btn"
-              }
-              onClick={() => switchDeck(deck.slug)}
-            >
-              {deckLabel(dict, deck.slug)}
-            </button>
-          ))}
-        </fieldset>
-      ) : null}
-
-      {/* Theme filter: outing shortcuts first (if in deck), then the rest */}
-      {deckTags.length > 0 ? (
-        <div className="theme-bar">
-          {outing.length > 0 ? (
-            <p className="theme-bar__outing">{dict.outingLabel}</p>
-          ) : null}
-          <fieldset className="theme-chips" disabled={filtersLocked || pending}>
-            <legend className="sr-only">{dict.themeLegend}</legend>
-            <button
-              type="button"
-              className={
-                !tag ? "theme-chips__btn is-active" : "theme-chips__btn"
-              }
-              onClick={() => switchFilters({ tag: null })}
-            >
-              {dict.themeAll}
-            </button>
-            {outing.map((outingTag) => (
-              <button
-                key={outingTag}
-                type="button"
-                className={
-                  tag === outingTag
-                    ? "theme-chips__btn theme-chips__btn--outing is-active"
-                    : "theme-chips__btn theme-chips__btn--outing"
-                }
-                onClick={() => switchFilters({ tag: outingTag })}
-              >
-                {tagLabel(dict, outingTag)}
-              </button>
-            ))}
-            {other.map((otherTag) => (
-              <button
-                key={otherTag}
-                type="button"
-                className={
-                  tag === otherTag
-                    ? "theme-chips__btn is-active"
-                    : "theme-chips__btn"
-                }
-                onClick={() => switchFilters({ tag: otherTag })}
-              >
-                {tagLabel(dict, otherTag)}
-              </button>
-            ))}
-          </fieldset>
-        </div>
-      ) : null}
-
-      <div className="study__toolbar">
-        <fieldset
-          className="direction-toggle"
-          disabled={filtersLocked || pending}
+      {/* Slim stage bar — filters stay one tap away, even on the done screen */}
+      <div className="study-stage">
+        <button
+          type="button"
+          className={
+            filtersOpen
+              ? "study-stage__filters is-open"
+              : "study-stage__filters"
+          }
+          aria-expanded={filtersOpen}
+          onClick={() => setFiltersOpen((open) => !open)}
         >
-          <legend className="sr-only">{dict.directionLegend}</legend>
-          <button
-            type="button"
-            className={
-              direction === "id_to_nl"
-                ? "direction-toggle__btn is-active"
-                : "direction-toggle__btn"
-            }
-            onClick={() => switchFilters({ direction: "id_to_nl" })}
-          >
-            ID → NL
-          </button>
-          <button
-            type="button"
-            className={
-              direction === "nl_to_id"
-                ? "direction-toggle__btn is-active"
-                : "direction-toggle__btn"
-            }
-            onClick={() => switchFilters({ direction: "nl_to_id" })}
-          >
-            NL → ID
-          </button>
-        </fieldset>
-        <p className="study__count">
-          {remaining > 0
-            ? dict.cardsLeft.replace("{n}", String(remaining))
-            : dict.done}
+          {filtersOpen ? dict.hideFilters : dict.showFilters}
+          {themeLabel && !filtersOpen ? (
+            <span className="study-stage__tag">{themeLabel}</span>
+          ) : null}
+        </button>
+        <p className="study-stage__meta">
+          <span>{directionShort(direction)}</span>
+          <span aria-hidden="true">·</span>
+          <span>
+            {current
+              ? dict.cardsLeft.replace("{n}", String(remaining))
+              : dict.done}
+          </span>
         </p>
       </div>
 
+      {filtersOpen ? (
+        <div className="study-filters">
+          <div className="habit-strip" aria-live="polite">
+            <span>{dict.habitDue.replace("{n}", String(habit.dueNow))}</span>
+            <span aria-hidden="true">·</span>
+            <span>
+              {dict.habitToday
+                .replace("{done}", String(reviewedToday))
+                .replace("{goal}", String(habit.dailyGoal))}
+            </span>
+            <span aria-hidden="true">·</span>
+            <span>
+              {habit.streakDays > 0
+                ? dict.habitStreak.replace("{n}", String(habit.streakDays))
+                : goalMet
+                  ? dict.habitGoalMet
+                  : dict.habitStreak.replace("{n}", "0")}
+            </span>
+          </div>
+
+          {/* Deck picker */}
+          {decks.length > 1 ? (
+            <fieldset
+              className="deck-toggle"
+              disabled={filtersLocked || pending}
+            >
+              <legend className="sr-only">{dict.deckLegend}</legend>
+              {decks.map((deck) => (
+                <button
+                  key={deck.slug}
+                  type="button"
+                  className={
+                    deckSlug === deck.slug
+                      ? "deck-toggle__btn is-active"
+                      : "deck-toggle__btn"
+                  }
+                  onClick={() => switchDeck(deck.slug)}
+                >
+                  {deckLabel(dict, deck.slug)}
+                </button>
+              ))}
+            </fieldset>
+          ) : null}
+
+          {/* Theme filter: outing shortcuts first (if in deck), then the rest */}
+          {deckTags.length > 0 ? (
+            <div className="theme-bar">
+              {outing.length > 0 ? (
+                <p className="theme-bar__outing">{dict.outingLabel}</p>
+              ) : null}
+              <fieldset
+                className="theme-chips"
+                disabled={filtersLocked || pending}
+              >
+                <legend className="sr-only">{dict.themeLegend}</legend>
+                <button
+                  type="button"
+                  className={
+                    !tag ? "theme-chips__btn is-active" : "theme-chips__btn"
+                  }
+                  onClick={() => switchFilters({ tag: null })}
+                >
+                  {dict.themeAll}
+                </button>
+                {outing.map((outingTag) => (
+                  <button
+                    key={outingTag}
+                    type="button"
+                    className={
+                      tag === outingTag
+                        ? "theme-chips__btn theme-chips__btn--outing is-active"
+                        : "theme-chips__btn theme-chips__btn--outing"
+                    }
+                    onClick={() => switchFilters({ tag: outingTag })}
+                  >
+                    {tagLabel(dict, outingTag)}
+                  </button>
+                ))}
+                {other.map((otherTag) => (
+                  <button
+                    key={otherTag}
+                    type="button"
+                    className={
+                      tag === otherTag
+                        ? "theme-chips__btn is-active"
+                        : "theme-chips__btn"
+                    }
+                    onClick={() => switchFilters({ tag: otherTag })}
+                  >
+                    {tagLabel(dict, otherTag)}
+                  </button>
+                ))}
+              </fieldset>
+            </div>
+          ) : null}
+
+          <div className="study__toolbar">
+            <fieldset
+              className="direction-toggle"
+              disabled={filtersLocked || pending}
+            >
+              <legend className="sr-only">{dict.directionLegend}</legend>
+              <button
+                type="button"
+                className={
+                  direction === "id_to_nl"
+                    ? "direction-toggle__btn is-active"
+                    : "direction-toggle__btn"
+                }
+                onClick={() => switchFilters({ direction: "id_to_nl" })}
+              >
+                ID → NL
+              </button>
+              <button
+                type="button"
+                className={
+                  direction === "nl_to_id"
+                    ? "direction-toggle__btn is-active"
+                    : "direction-toggle__btn"
+                }
+                onClick={() => switchFilters({ direction: "nl_to_id" })}
+              >
+                NL → ID
+              </button>
+            </fieldset>
+          </div>
+        </div>
+      ) : null}
+
       {!current ? (
         <div className="study-empty">
+          <BridgeMark />
           <h1>
             {themeLabel
               ? dict.emptyTitleTheme.replace("{theme}", themeLabel)

@@ -3,18 +3,7 @@
  * Pure functions only — no DB — so we can reason about schedules easily.
  */
 
-export type Sm2Rating = "again" | "hard" | "good" | "easy";
-
-export type Sm2State = {
-  easeFactor: number;
-  intervalDays: number;
-  repetitions: number;
-};
-
-export type Sm2Result = Sm2State & {
-  /** Days until the card is due again (0 = same day / immediately). */
-  dueInDays: number;
-};
+import type { Sm2Rating, Sm2Result, Sm2State } from "@/features/study/types";
 
 const MIN_EASE = 1.3;
 

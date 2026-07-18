@@ -3,12 +3,18 @@
  * Available tags come from the active deck (see getDeckTags).
  */
 
+import type { KnownStudyTag, OutingTag } from "@/features/study/types";
+
 /**
  * “Today’s outing” shortcuts — shown first when the deck has them.
+ * Keep values in sync with OutingTag in types.ts.
  */
-export const OUTING_TAGS = ["ov", "belanja", "cafe", "arah"] as const;
-
-export type OutingTag = (typeof OUTING_TAGS)[number];
+export const OUTING_TAGS = [
+  "ov",
+  "belanja",
+  "cafe",
+  "arah",
+] as const satisfies readonly OutingTag[];
 
 /** Known tag ids used for i18n labels (unknown tags show the raw id). */
 export const KNOWN_TAG_LABELS = [
@@ -27,9 +33,7 @@ export const KNOWN_TAG_LABELS = [
   "perkenalan",
   "rumah",
   "waktu",
-] as const;
-
-export type StudyTag = (typeof KNOWN_TAG_LABELS)[number] | (string & {});
+] as const satisfies readonly KnownStudyTag[];
 
 const TAG_PATTERN = /^[a-z][a-z0-9-]*$/;
 

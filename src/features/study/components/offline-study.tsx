@@ -65,6 +65,12 @@ export function OfflineStudy({ locale, dict }: OfflineStudyProps) {
 
   return (
     <div className="study-empty">
+      {/* Same signature mark as study done — calm empty offline state */}
+      <div className="bridge-mark bridge-mark--compact" aria-hidden="true">
+        <span>ID</span>
+        <span className="bridge-mark__line" />
+        <span>NL</span>
+      </div>
       <h1>{dict.offline.emptyTitle}</h1>
       <p>{dict.offline.emptyBody}</p>
       <div className="study-empty__actions">

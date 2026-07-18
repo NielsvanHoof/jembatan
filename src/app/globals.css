@@ -199,7 +199,11 @@ a:hover {
   margin: 0 0 1rem;
 }
 
-.landing__bridge {
+/*
+  Signature bridge mark — landing hero + study done/empty peaks.
+  Tiny saffron arch spans ID and NL.
+*/
+.bridge-mark {
   display: flex;
   align-items: center;
   gap: 0.75rem;
@@ -211,7 +215,12 @@ a:hover {
   text-transform: uppercase;
 }
 
-.landing__bridge-line {
+.bridge-mark--compact {
+  margin: 0 0 1.1rem;
+  max-width: 14rem;
+}
+
+.bridge-mark__line {
   flex: 1;
   height: 2px;
   background: linear-gradient(
@@ -227,7 +236,7 @@ a:hover {
 }
 
 /* Signature: a tiny arched “span” in the middle of the bridge line */
-.landing__bridge-line::after {
+.bridge-mark__line::after {
   content: "";
   position: absolute;
   left: 50%;

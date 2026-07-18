@@ -72,11 +72,13 @@ export function buildPageMetadata({
       url,
       locale: openGraphLocale(locale),
       alternateLocale: alternateLocales,
+      // og:image inherited from app/[lang]/opengraph-image.tsx
     },
     twitter: {
-      card: "summary",
+      card: "summary_large_image",
       title,
       description,
+      // twitter:image inherited from app/[lang]/twitter-image.tsx
     },
   };
 }

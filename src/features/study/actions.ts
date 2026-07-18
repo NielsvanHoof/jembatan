@@ -8,8 +8,12 @@ import {
   ensureProgressRows,
   presentCard,
 } from "@/features/study/lib/ensure-progress";
-import { reviewSm2, type Sm2Rating } from "@/features/study/lib/sm2";
+import { reviewSm2 } from "@/features/study/lib/sm2";
 import { loadStreakDays } from "@/features/study/lib/streak";
+import {
+  reviewCardInputSchema,
+  studyDirectionSchema,
+} from "@/features/study/schemas";
 import type { HabitSummary, StudyCard } from "@/features/study/types";
 import {
   DAILY_REVIEW_GOAL,
@@ -20,19 +24,7 @@ import {
 import type { StudyErrorCode } from "@/lib/i18n/dictionaries";
 import { requireUserId } from "@/lib/session";
 
-function isDirection(value: string): value is StudyDirection {
-  return value === "id_to_nl" || value === "nl_to_id";
-}
-
-function isRating(value: string): value is Sm2Rating {
-  return (
-    value === "again" ||
-    value === "hard" ||
-    value === "good" ||
-    value === "easy"
-  );
-}
-
+/** Internal join shape for due-card selection — not part of the public domain API. */
 type ProgressRow = {
   progress: typeof cardProgress.$inferSelect;
   card: typeof cards.$inferSelect;
@@ -122,7 +114,9 @@ export async function reviewCardAction(input: {
 }): Promise<{ ok: true } | { ok: false; error: StudyErrorCode }> {
   const userId = await requireUserId();
 
-  if (!isRating(input.rating)) {
+  // Validate at the action boundary; keep SM-2 pure of string parsing.
+  const parsed = reviewCardInputSchema.safeParse(input);
+  if (!parsed.success) {
     return { ok: false, error: "unknown_rating" };
   }
 
@@ -131,7 +125,7 @@ export async function reviewCardAction(input: {
     .from(cardProgress)
     .where(
       and(
-        eq(cardProgress.id, input.progressId),
+        eq(cardProgress.id, parsed.data.progressId),
         eq(cardProgress.userId, userId),
       ),
     )
@@ -147,7 +141,7 @@ export async function reviewCardAction(input: {
       intervalDays: row.intervalDays,
       repetitions: row.repetitions,
     },
-    input.rating,
+    parsed.data.rating,
   );
 
   await db
@@ -236,8 +230,6 @@ export async function getHabitSummary(
 export async function parseDirection(
   value: string | undefined,
 ): Promise<StudyDirection> {
-  if (value && isDirection(value)) {
-    return value;
-  }
-  return "id_to_nl";
+  const parsed = studyDirectionSchema.safeParse(value);
+  return parsed.success ? parsed.data : "id_to_nl";
 }

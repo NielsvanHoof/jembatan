@@ -4,33 +4,13 @@
  */
 
 import type { StudyDirection } from "@/db/schema";
-import type { HabitSummary, StudyCard } from "@/features/study/types";
+import type { OfflineSession, PendingReview } from "@/features/study/types";
 import { calendarDayKey } from "@/lib/habit";
 
 const DB_NAME = "jembatan-offline";
 const DB_VERSION = 1;
 const SESSION_STORE = "sessions";
 const PENDING_STORE = "pendingReviews";
-
-export type OfflineSession = {
-  /** Composite key: day|deck|direction|tag|practice */
-  key: string;
-  dayKey: string;
-  deckSlug: string;
-  direction: StudyDirection;
-  tag?: string;
-  practiceAll: boolean;
-  cards: StudyCard[];
-  habit: HabitSummary;
-  savedAt: string;
-};
-
-export type PendingReview = {
-  id: string;
-  progressId: string;
-  rating: "again" | "hard" | "good" | "easy";
-  queuedAt: string;
-};
 
 function openDb(): Promise<IDBDatabase> {
   return new Promise((resolve, reject) => {

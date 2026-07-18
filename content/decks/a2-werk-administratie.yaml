@@ -216,3 +216,144 @@ cards:
   - frontId: Kata sandi kerja
     backNl: het werkaccount / het wachtwoord
     tags: [kerja, administrasi]
+  # --- Extra A2: work conditions & HR ---
+  - frontId: Kerja paruh waktu
+    backNl: deeltijd werken
+    exampleId: Saya kerja paruh waktu tiga hari seminggu.
+    exampleNl: Ik werk deeltijd, drie dagen per week.
+    tags: [kerja]
+  - frontId: Kerja penuh waktu
+    backNl: fulltime werken
+    tags: [kerja]
+  - frontId: Magang
+    backNl: de stage
+    tags: [kerja]
+  - frontId: SDM / sumber daya manusia
+    backNl: de HR-afdeling / personeelszaken
+    tags: [kerja, administrasi]
+  - frontId: Onboarding / pengenalan kerja
+    backNl: de inwerkperiode
+    tags: [kerja]
+  - frontId: Kerja hybrid
+    backNl: hybride werken
+    # Quoted — bare ":" in values breaks YAML mapping parse.
+    exampleId: "Kami kerja hybrid: dua hari di kantor."
+    exampleNl: "We werken hybride: twee dagen op kantoor."
+    tags: [kerja]
+  - frontId: Stand-up / rapat singkat
+    backNl: de stand-up
+    tags: [kerja]
+  - frontId: Klien / pelanggan bisnis
+    backNl: de klant
+    tags: [kerja]
+  - frontId: Faktur
+    backNl: de factuur
+    exampleId: Saya kirim faktur minggu ini.
+    exampleNl: Ik stuur deze week de factuur.
+    tags: [kerja, administrasi]
+  - frontId: Biaya perjalanan
+    backNl: de reiskosten
+    tags: [kerja, administrasi]
+  - frontId: Klaim biaya
+    backNl: de declaratie
+    tags: [kerja, administrasi]
+  - frontId: Surat sakit dari dokter
+    backNl: de ziekmelding / het doktersbriefje
+    tags: [kerja, kesehatan]
+  - frontId: Cuti hamil / cuti orang tua
+    backNl: het ouderschapsverlof
+    tags: [kerja]
+  - frontId: Pensiun
+    backNl: het pensioen
+    tags: [kerja, administrasi]
+  - frontId: Dewan karyawan
+    backNl: de ondernemingsraad (OR)
+    tags: [kerja]
+  - frontId: Upah minimum
+    backNl: het minimumloon
+    tags: [kerja]
+  - frontId: Slip pajak tahunan
+    backNl: de jaaropgave
+    tags: [kerja, administrasi]
+  - frontId: Bonus
+    backNl: de bonus
+    tags: [kerja]
+  - frontId: Promosi
+    backNl: de promotie
+    tags: [kerja]
+  - frontId: Soft skill
+    backNl: de soft skills
+    tags: [kerja]
+  - frontId: Saya siap membantu
+    backNl: Ik help je graag
+    tags: [beleefdheid, kerja]
+  - frontId: Bisakah Anda menjelaskan lagi?
+    backNl: Kunt u dat nog een keer uitleggen?
+    tags: [beleefdheid, kerja]
+  - frontId: Saya setuju
+    backNl: Ik ben het eens
+    tags: [beleefdheid, kerja]
+  - frontId: Saya tidak setuju
+    backNl: Ik ben het er niet mee eens
+    tags: [beleefdheid, kerja]
+  # --- Extra A2: Dutch admin & benefits ---
+  - frontId: Pendaftaran penduduk
+    backNl: de inschrijving bij de gemeente (BRP)
+    exampleId: Saya harus daftar di balai kota.
+    exampleNl: Ik moet me inschrijven bij de gemeente.
+    tags: [administrasi]
+  - frontId: Perubahan alamat
+    backNl: de adreswijziging
+    tags: [administrasi]
+  - frontId: MijnOverheid
+    backNl: MijnOverheid
+    exampleId: Surat resmi ada di MijnOverheid.
+    exampleNl: Officiële post staat in MijnOverheid.
+    tags: [administrasi]
+  - frontId: IND
+    backNl: de IND (Immigratie- en Naturalisatiedienst)
+    tags: [administrasi]
+  - frontId: UWV
+    backNl: het UWV
+    exampleId: Saya ajukan tunjangan di UWV.
+    exampleNl: Ik vraag een uitkering aan bij het UWV.
+    tags: [administrasi, kerja]
+  - frontId: Tunjangan pengangguran
+    backNl: de WW-uitkering
+    tags: [administrasi, kerja]
+  - frontId: Tunjangan anak
+    backNl: het kinderbijslag
+    tags: [administrasi]
+  - frontId: Tunjangan sewa
+    backNl: de huurtoeslag
+    tags: [administrasi, rumah]
+  - frontId: Tunjangan perawatan kesehatan
+    backNl: de zorgtoeslag
+    tags: [administrasi, kesehatan]
+  - frontId: Pajak kota
+    backNl: de gemeentelijke belastingen
+    tags: [administrasi]
+  - frontId: Tagihan energi
+    backNl: de energierekening
+    tags: [administrasi, rumah]
+  - frontId: Janji temu paspor
+    backNl: de paspoortafspraak
+    tags: [administrasi]
+  - frontId: Salinan dokumen
+    backNl: de kopie / de scan
+    tags: [administrasi]
+  - frontId: Tanda tangan digital
+    backNl: de digitale handtekening
+    tags: [administrasi]
+  - frontId: Konfirmasi penerimaan
+    backNl: de ontvangstbevestiging
+    tags: [administrasi]
+  - frontId: Batas waktu pembayaran
+    backNl: de betaaltermijn
+    tags: [administrasi]
+  - frontId: Saya masih menunggu balasan
+    backNl: Ik wacht nog op een reactie
+    tags: [beleefdheid, administrasi]
+  - frontId: Bisakah Anda mengirim konfirmasi?
+    backNl: Kunt u een bevestiging sturen?
+    tags: [beleefdheid, administrasi]

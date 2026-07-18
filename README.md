@@ -27,7 +27,7 @@ Set `AUTH_SECRET` (`openssl rand -base64 32`). Keep `DATABASE_URL` for Docker be
 docker compose up -d
 ```
 
-3. Migrate + seed (~118 cards, optional seed user):
+3. Migrate + seed (~300 cards across A1 + A2, optional seed user):
 
 ```bash
 npm install
@@ -126,7 +126,7 @@ Serverless functions run in **Frankfurt (`fra1`)** via [`vercel.json`](vercel.js
 | `npm run lint` | Biome check |
 | `npm run typecheck` | `tsc --noEmit` |
 | `npm run db:migrate` | Apply Drizzle migrations |
-| `npm run db:seed` | Seed A1 deck (+ optional user) |
+| `npm run db:seed` | Seed A1 + A2 decks (+ optional user) |
 | `npm run db:studio` | Drizzle Studio |
 
 ## Security notes

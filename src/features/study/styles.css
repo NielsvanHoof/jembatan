@@ -137,6 +137,71 @@
   cursor: not-allowed;
 }
 
+/* Compact bar while a card is on stage — filters stay one tap away */
+.study-stage {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.65rem;
+  flex-shrink: 0;
+  min-width: 0;
+}
+
+.study-stage__filters {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  min-height: 2.5rem;
+  padding: 0.3rem 0.75rem;
+  border-radius: 999px;
+  border: 1px solid color-mix(in oklab, var(--canal) 20%, transparent);
+  background: color-mix(in oklab, white 70%, var(--mist));
+  color: var(--canal);
+  font: inherit;
+  font-size: 0.8rem;
+  font-weight: 700;
+  cursor: pointer;
+  max-width: 60%;
+}
+
+.study-stage__filters.is-open {
+  background: color-mix(in oklab, var(--canal) 12%, white);
+  border-color: color-mix(in oklab, var(--canal) 35%, transparent);
+}
+
+.study-stage__tag {
+  font-weight: 600;
+  color: var(--saffron-deep);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.study-stage__tag::before {
+  content: "· ";
+  color: var(--bridge);
+  font-weight: 700;
+}
+
+.study-stage__meta {
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--bridge);
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.study-filters {
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+  flex-shrink: 0;
+}
+
 .study__toolbar {
   display: flex;
   align-items: center;
@@ -332,7 +397,19 @@
 }
 
 .study-empty {
-  padding: 2rem 0.25rem;
+  /* Fill leftover space so the calm message sits as the composition */
+  flex: 1 1 auto;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 1.25rem 0.25rem 2rem;
+  animation: rise-in 650ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .study-empty {
+    animation: none;
+  }
 }
 
 .study-empty h1 {

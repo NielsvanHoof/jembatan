@@ -2,11 +2,8 @@
 
 import Link from "next/link";
 import { useActionState } from "react";
-import {
-  type AuthFormState,
-  loginAction,
-  registerAction,
-} from "@/features/auth/actions";
+import { loginAction, registerAction } from "@/features/auth/actions";
+import type { AuthFormMode, AuthFormState } from "@/features/auth/types";
 import type { Dictionary, Locale } from "@/lib/i18n/dictionaries";
 import { pathFor } from "@/lib/i18n/paths";
 
@@ -15,7 +12,7 @@ import "../styles.css";
 const initial: AuthFormState = {};
 
 type AuthFormProps = {
-  mode: "login" | "register";
+  mode: AuthFormMode;
   locale: Locale;
   dict: Dictionary["auth"];
 };

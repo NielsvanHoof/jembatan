@@ -3,11 +3,8 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { AppNav } from "@/components/app-nav";
 import { getProgressStats } from "@/features/progress/actions";
-import {
-  type DeckSummary,
-  listDecks,
-  parseDeckSlug,
-} from "@/features/study/lib/decks";
+import { listDecks, parseDeckSlug } from "@/features/study/lib/decks";
+import type { DeckSummary } from "@/features/study/types";
 import {
   type Dictionary,
   getDictionary,
@@ -81,6 +78,32 @@ function DeckPicker({
   );
 }
 
+/**
+ * Pride hero: streak when she’s building a habit; mastered when streak is still 0.
+ */
+function ProgressHero({
+  streakDays,
+  mastered,
+  streakCaption,
+  masteredCaption,
+}: {
+  streakDays: number;
+  mastered: number;
+  streakCaption: string;
+  masteredCaption: string;
+}) {
+  const useStreak = streakDays > 0;
+  const value = useStreak ? streakDays : mastered;
+  const caption = useStreak ? streakCaption : masteredCaption;
+
+  return (
+    <div className="progress-hero">
+      <p className="progress-hero__value">{value}</p>
+      <p className="progress-hero__caption">{caption}</p>
+    </div>
+  );
+}
+
 export default async function ProgressPage({
   params,
   searchParams,
@@ -98,6 +121,32 @@ export default async function ProgressPage({
     listDecks(),
   ]);
 
+  // Quiet secondary stats — hero already carries streak or mastered.
+  const quietStats: { label: string; value: number }[] = [
+    { label: dict.progress.dueNow, value: stats.dueNow },
+    { label: dict.progress.reviewedToday, value: stats.reviewedToday },
+    { label: dict.progress.dailyGoal, value: stats.dailyGoal },
+    { label: dict.progress.learning, value: stats.learning },
+  ];
+
+  // Show the non-hero metric in the quiet list so nothing is hidden.
+  if (stats.streakDays > 0) {
+    quietStats.push({
+      label: dict.progress.mastered,
+      value: stats.mastered,
+    });
+  } else {
+    quietStats.push({
+      label: dict.progress.streak,
+      value: stats.streakDays,
+    });
+  }
+
+  quietStats.push({
+    label: dict.progress.totalCards,
+    value: stats.totalCards,
+  });
+
   return (
     <div className="app-shell">
       <AppNav locale={lang} dict={dict} active="progress" />
@@ -112,49 +161,20 @@ export default async function ProgressPage({
           deckSlug={deckSlug}
         />
 
-        <div className="habit-strip habit-strip--page" aria-live="polite">
-          <span>
-            {dict.study.habitToday
-              .replace("{done}", String(stats.reviewedToday))
-              .replace("{goal}", String(stats.dailyGoal))}
-          </span>
-          <span aria-hidden="true">·</span>
-          <span>
-            {dict.study.habitStreak.replace("{n}", String(stats.streakDays))}
-          </span>
-        </div>
+        <ProgressHero
+          streakDays={stats.streakDays}
+          mastered={stats.mastered}
+          streakCaption={dict.progress.streakHero}
+          masteredCaption={dict.progress.masteredHero}
+        />
 
-        <ul className="stat-list">
-          <li>
-            <span className="stat-list__label">{dict.progress.dueNow}</span>
-            <span className="stat-list__value">{stats.dueNow}</span>
-          </li>
-          <li>
-            <span className="stat-list__label">
-              {dict.progress.reviewedToday}
-            </span>
-            <span className="stat-list__value">{stats.reviewedToday}</span>
-          </li>
-          <li>
-            <span className="stat-list__label">{dict.progress.streak}</span>
-            <span className="stat-list__value">{stats.streakDays}</span>
-          </li>
-          <li>
-            <span className="stat-list__label">{dict.progress.dailyGoal}</span>
-            <span className="stat-list__value">{stats.dailyGoal}</span>
-          </li>
-          <li>
-            <span className="stat-list__label">{dict.progress.learning}</span>
-            <span className="stat-list__value">{stats.learning}</span>
-          </li>
-          <li>
-            <span className="stat-list__label">{dict.progress.mastered}</span>
-            <span className="stat-list__value">{stats.mastered}</span>
-          </li>
-          <li>
-            <span className="stat-list__label">{dict.progress.totalCards}</span>
-            <span className="stat-list__value">{stats.totalCards}</span>
-          </li>
+        <ul className="stat-list stat-list--quiet">
+          {quietStats.map((item) => (
+            <li key={item.label}>
+              <span className="stat-list__label">{item.label}</span>
+              <span className="stat-list__value">{item.value}</span>
+            </li>
+          ))}
         </ul>
 
         <div className="progress-cta">

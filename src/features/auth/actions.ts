@@ -2,35 +2,13 @@
 
 import { eq } from "drizzle-orm";
 import { AuthError } from "next-auth";
-import { z } from "zod";
 import { db } from "@/db";
 import { users } from "@/db/schema";
+import { loginSchema, registerSchema } from "@/features/auth/schemas";
+import type { AuthFormState } from "@/features/auth/types";
 import { hashPassword, signIn, signOut } from "@/lib/auth";
-import {
-  type AuthErrorCode,
-  DEFAULT_LOCALE,
-  isLocale,
-} from "@/lib/i18n/dictionaries";
+import { DEFAULT_LOCALE, isLocale } from "@/lib/i18n/dictionaries";
 import { pathFor } from "@/lib/i18n/paths";
-
-const registerSchema = z.object({
-  name: z.string().min(1).max(80),
-  email: z.email(),
-  password: z.string().min(8).max(100),
-  locale: z.string().optional(),
-});
-
-const loginSchema = z.object({
-  email: z.email(),
-  password: z.string().min(8).max(100),
-  locale: z.string().optional(),
-});
-
-export type AuthFormState = {
-  /** Stable code — UI translates based on current locale */
-  error?: AuthErrorCode;
-  success?: boolean;
-};
 
 function localeFromForm(value: string | undefined) {
   return isLocale(value) ? value : DEFAULT_LOCALE;

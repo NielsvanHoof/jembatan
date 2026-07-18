@@ -3,25 +3,12 @@
 import { and, asc, desc, eq, gt, isNotNull, sql } from "drizzle-orm";
 import { db } from "@/db";
 import { cardProgress, cards, decks, type StudyDirection } from "@/db/schema";
+import type { ProgressStats } from "@/features/progress/types";
 import { DEFAULT_DECK_SLUG } from "@/features/study/lib/decks";
 import { ensureProgressRows } from "@/features/study/lib/ensure-progress";
 import { loadStreakDays } from "@/features/study/lib/streak";
 import { DAILY_REVIEW_GOAL, startOfStudyDay } from "@/lib/habit";
 import { requireUserId } from "@/lib/session";
-
-export type ProgressStats = {
-  dueNow: number;
-  learning: number;
-  mastered: number;
-  totalCards: number;
-  reviewedToday: number;
-  /** Consecutive Amsterdam calendar days with at least one review. */
-  streakDays: number;
-  dailyGoal: number;
-  /** Earliest future due time for this deck (any direction), if any. */
-  nextDueAt: Date | null;
-  lastStudiedAt: Date | null;
-};
 
 export async function getProgressStats(options?: {
   direction?: StudyDirection;

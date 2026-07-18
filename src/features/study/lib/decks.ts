@@ -5,17 +5,10 @@
 import { asc, eq } from "drizzle-orm";
 import { db } from "@/db";
 import { cards, decks } from "@/db/schema";
+import type { DeckSummary } from "@/features/study/types";
 
 /** Fallback when `?deck=` is missing or unknown. */
 export const DEFAULT_DECK_SLUG = "a1-kehidupan-sehari-hari";
-
-export type DeckSummary = {
-  slug: string;
-  level: string;
-  titleId: string;
-  titleNl: string;
-  descriptionId: string;
-};
 
 /** All seeded decks, A1 before A2 then slug. */
 export async function listDecks(): Promise<DeckSummary[]> {

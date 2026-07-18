@@ -78,6 +78,9 @@ export type Dictionary = {
     practiceAgain: string;
     seeProgress: string;
     clearTheme: string;
+    /** Collapsible study chrome — card stays the stage. */
+    showFilters: string;
+    hideFilters: string;
     langId: string;
     langNl: string;
     showAnswer: string;
@@ -141,6 +144,10 @@ export type Dictionary = {
     mastered: string;
     totalCards: string;
     streak: string;
+    /** Caption under the big streak number (pride hero). */
+    streakHero: string;
+    /** Caption when streak is 0 and mastered is the hero. */
+    masteredHero: string;
     dailyGoal: string;
     startSession: string;
     deckLegend: string;
@@ -222,12 +229,12 @@ const id: Dictionary = {
     directionLegend: "Arah belajar",
     cardsLeft: "{n} kartu",
     done: "Selesai",
-    emptyTitle: "Tidak ada kartu jatuh tempo",
+    emptyTitle: "Sudah cukup untuk sekarang",
     emptyBody:
-      "Hebat — untuk arah ini semuanya sudah dijadwalkan ulang. Istirahat dulu, atau latihan ulang kosakata.",
-    emptyTitleTheme: "Tidak ada kartu {theme} jatuh tempo",
+      "Semua kartu di arah ini sudah dijadwalkan lagi. Istirahat dulu — atau latihan ulang kalau masih ingin.",
+    emptyTitleTheme: "Tema {theme} sudah aman",
     emptyBodyTheme:
-      "Semua kartu tema ini sudah dijadwalkan ulang. Coba tema lain, atau latihan ulang.",
+      "Tidak ada yang jatuh tempo di sini. Pilih tema lain, atau latihan ulang pelan-pelan.",
     emptyNextDue: "Kartu berikutnya {when}.",
     nextDueHours: "dalam ~{n} jam",
     nextDueDays: "dalam ~{n} hari",
@@ -235,13 +242,15 @@ const id: Dictionary = {
     practiceAgain: "Latihan ulang",
     seeProgress: "Lihat kemajuan",
     clearTheme: "Semua tema",
+    showFilters: "Filter",
+    hideFilters: "Sembunyikan filter",
     langId: "Indonesia",
     langNl: "Belanda",
     showAnswer: "Tampilkan jawaban",
     habitDue: "{n} jatuh tempo",
     habitToday: "{done}/{goal} hari ini",
     habitStreak: "{n} hari beruntun",
-    habitGoalMet: "Target harian tercapai",
+    habitGoalMet: "Target hari ini tercapai — hebat",
     themeLegend: "Tema belajar",
     themeAll: "Semua",
     outingLabel: "Outing hari ini",
@@ -283,20 +292,22 @@ const id: Dictionary = {
   offline: {
     loading: "Memuat kartu tersimpan…",
     cachedBanner: "Mode offline — kartu dari cache hari ini",
-    emptyTitle: "Belum ada kartu offline",
+    emptyTitle: "Belum ada kartu di ponsel",
     emptyBody:
-      "Buka Belajar saat online dulu agar kartu hari ini tersimpan di ponsel.",
+      "Buka Belajar sekali saat online — nanti kartu hari ini tersimpan untuk latihan di mana saja.",
     openStudy: "Ke Belajar",
   },
   progress: {
     title: "Kemajuan",
-    lede: "Ringkasan untuk kedua arah: Indonesia → Belanda dan sebaliknya.",
+    lede: "Lihat jembatanmu tumbuh — Indonesia → Belanda dan sebaliknya.",
     dueNow: "Jatuh tempo sekarang",
     reviewedToday: "Dikerjakan hari ini",
     learning: "Sedang dipelajari",
     mastered: "Sudah menguasai",
     totalCards: "Total kartu (kedua arah)",
     streak: "Hari beruntun",
+    streakHero: "hari beruntun",
+    masteredHero: "kartu dikuasai",
     dailyGoal: "Target harian",
     startSession: "Mulai sesi belajar",
     deckLegend: "Dek",
@@ -378,12 +389,12 @@ const en: Dictionary = {
     directionLegend: "Study direction",
     cardsLeft: "{n} cards",
     done: "Done",
-    emptyTitle: "No cards due",
+    emptyTitle: "That’s enough for now",
     emptyBody:
-      "Nice — everything for this direction is scheduled again. Take a break, or practice the vocab again.",
-    emptyTitleTheme: "No {theme} cards due",
+      "Everything in this direction is scheduled again. Rest a bit — or practice again if you still feel like it.",
+    emptyTitleTheme: "{theme} is covered for now",
     emptyBodyTheme:
-      "Everything in this theme is scheduled again. Try another theme, or practice again.",
+      "Nothing due in this theme. Pick another, or practice again gently.",
     emptyNextDue: "Next card {when}.",
     nextDueHours: "in ~{n} hours",
     nextDueDays: "in ~{n} days",
@@ -391,13 +402,15 @@ const en: Dictionary = {
     practiceAgain: "Practice again",
     seeProgress: "See progress",
     clearTheme: "All themes",
+    showFilters: "Filters",
+    hideFilters: "Hide filters",
     langId: "Indonesian",
     langNl: "Dutch",
     showAnswer: "Show answer",
     habitDue: "{n} due",
     habitToday: "{done}/{goal} today",
     habitStreak: "{n}-day streak",
-    habitGoalMet: "Daily goal met",
+    habitGoalMet: "Daily goal met — nice",
     themeLegend: "Study theme",
     themeAll: "All",
     outingLabel: "Today’s outing",
@@ -439,20 +452,22 @@ const en: Dictionary = {
   offline: {
     loading: "Loading saved cards…",
     cachedBanner: "Offline — using today’s cached cards",
-    emptyTitle: "No offline cards yet",
+    emptyTitle: "No cards on this phone yet",
     emptyBody:
-      "Open Study while online first so today’s cards are saved on your phone.",
+      "Open Study once while online — then today’s cards stay saved for practice anywhere.",
     openStudy: "Go to Study",
   },
   progress: {
     title: "Progress",
-    lede: "Summary for both directions: Indonesian → Dutch and the reverse.",
+    lede: "Watch your bridge grow — Indonesian → Dutch and the reverse.",
     dueNow: "Due now",
     reviewedToday: "Reviewed today",
     learning: "Learning",
     mastered: "Mastered",
     totalCards: "Total cards (both directions)",
     streak: "Day streak",
+    streakHero: "day streak",
+    masteredHero: "cards mastered",
     dailyGoal: "Daily goal",
     startSession: "Start a study session",
     deckLegend: "Deck",

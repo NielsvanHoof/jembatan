@@ -73,14 +73,13 @@ export async function generateMetadata({
       url: pathFor(lang, "/"),
       locale: openGraphLocale(lang),
       alternateLocale: locales.filter((l) => l !== lang).map(openGraphLocale),
-      // App icon until a dedicated 1200×630 OG asset exists.
-      images: [{ url: "/icons/icon-512.png", alt: "Jembatan" }],
+      // Image comes from app/[lang]/opengraph-image.tsx (bridge motif).
     },
     twitter: {
-      card: "summary",
+      // Large card uses app/[lang]/twitter-image.tsx (same bridge art).
+      card: "summary_large_image",
       title: dict.meta.title,
       description: dict.meta.description,
-      images: ["/icons/icon-512.png"],
     },
     appleWebApp: {
       capable: true,

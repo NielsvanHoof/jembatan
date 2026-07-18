@@ -500,3 +500,313 @@ cards:
     backNl: Ik leer Nederlands
     tags:
       - perkenalan
+  # --- Extra A1: politeness & basics ---
+  - frontId: Boleh ulang lagi?
+    backNl: Kunt u dat herhalen?
+    tags:
+      - beleefdheid
+  - frontId: Bagaimana cara mengucapkannya?
+    backNl: Hoe spreek je dat uit?
+    tags:
+      - beleefdheid
+  - frontId: Tidak apa-apa
+    backNl: Geen probleem
+    tags:
+      - beleefdheid
+  - frontId: Selamat datang
+    backNl: Welkom
+    tags:
+      - beleefdheid
+  - frontId: Hati-hati
+    backNl: Pas op / Wees voorzichtig
+    tags:
+      - beleefdheid
+  - frontId: Mungkin
+    backNl: Misschien
+    tags:
+      - dasar
+  - frontId: Saya tidak tahu
+    backNl: Ik weet het niet
+    tags:
+      - dasar
+  - frontId: Sedikit
+    backNl: Een beetje
+    tags:
+      - dasar
+  - frontId: Banyak
+    backNl: Veel
+    tags:
+      - dasar
+  # --- Extra A1: shopping & food ---
+  - frontId: Tunai / uang tunai
+    backNl: Contant
+    exampleId: Apakah bisa bayar tunai?
+    exampleNl: Kan ik contant betalen?
+    tags:
+      - belanja
+  - frontId: Kembalian
+    backNl: Het wisselgeld
+    tags:
+      - belanja
+  - frontId: Toko roti
+    backNl: Bakkerij
+    tags:
+      - belanja
+      - makanan
+  - frontId: Kasir
+    backNl: De kassa
+    tags:
+      - belanja
+  - frontId: Kartu pelanggan
+    backNl: Klantenkaart
+    tags:
+      - belanja
+  - frontId: Nasi
+    backNl: Rijst
+    tags:
+      - belanja
+      - makanan
+  - frontId: Ayam
+    backNl: Kip
+    tags:
+      - belanja
+      - makanan
+  - frontId: Ikan
+    backNl: Vis
+    tags:
+      - belanja
+      - makanan
+  - frontId: Kentang
+    backNl: Aardappelen
+    tags:
+      - belanja
+      - makanan
+  - frontId: Mentega
+    backNl: Boter
+    tags:
+      - belanja
+      - makanan
+  - frontId: Garam
+    backNl: Zout
+    tags:
+      - belanja
+      - makanan
+  - frontId: Gula
+    backNl: Suiker
+    tags:
+      - belanja
+      - makanan
+  - frontId: Vegetarian
+    backNl: Vegetarisch
+    exampleId: Apakah ada menu vegetarian?
+    exampleNl: Heeft u een vegetarisch menu?
+    tags:
+      - cafe
+      - makanan
+  - frontId: Bawa pulang
+    backNl: Om mee te nemen
+    exampleId: Saya mau bawa pulang.
+    exampleNl: Ik wil het meenemen.
+    tags:
+      - cafe
+  - frontId: Tip / uang tip
+    backNl: Fooi
+    tags:
+      - cafe
+  - frontId: Meja untuk dua orang
+    backNl: Een tafel voor twee
+    tags:
+      - cafe
+  - frontId: Saya alergi…
+    backNl: Ik ben allergisch voor…
+    tags:
+      - cafe
+      - kesehatan
+  # --- Extra A1: OV & directions ---
+  - frontId: Metro / kereta bawah tanah
+    backNl: Metro
+    tags:
+      - ov
+  - frontId: Transfer / ganti kendaraan
+    backNl: Overstappen
+    exampleId: Saya harus transfer di Utrecht.
+    exampleNl: Ik moet in Utrecht overstappen.
+    tags:
+      - ov
+  - frontId: Tujuan
+    backNl: Bestemming
+    tags:
+      - ov
+  - frontId: Parkir sepeda
+    backNl: Fietsenstalling
+    tags:
+      - ov
+  - frontId: Jadwal
+    backNl: Dienstregeling / rooster
+    tags:
+      - ov
+  - frontId: Dekat
+    backNl: Dichtbij
+    tags:
+      - arah
+  - frontId: Jauh
+    backNl: Ver
+    tags:
+      - arah
+  - frontId: Di sebelah
+    backNl: Naast
+    tags:
+      - arah
+  - frontId: Di seberang
+    backNl: Tegenover
+    tags:
+      - arah
+  - frontId: Bundaran
+    backNl: Rotonde
+    tags:
+      - arah
+  - frontId: Jembatan
+    backNl: Brug
+    tags:
+      - arah
+  # --- Extra A1: home ---
+  - frontId: Kotak surat
+    backNl: Brievenbus
+    tags:
+      - rumah
+  - frontId: Bel pintu
+    backNl: Deurbel
+    tags:
+      - rumah
+  - frontId: Pemilik rumah / tuan tanah
+    backNl: Huurbaas / verhuurder
+    tags:
+      - rumah
+  - frontId: Pemanas / radiator
+    backNl: Verwarming
+    tags:
+      - rumah
+  - frontId: Mesin cuci
+    backNl: Wasmachine
+    tags:
+      - rumah
+  - frontId: Dapur
+    backNl: Keuken
+    tags:
+      - rumah
+  - frontId: Kamar mandi
+    backNl: Badkamer
+    tags:
+      - rumah
+  - frontId: Kamar tidur
+    backNl: Slaapkamer
+    tags:
+      - rumah
+  # --- Extra A1: health ---
+  - frontId: Sakit kepala
+    backNl: Hoofdpijn
+    tags:
+      - kesehatan
+  - frontId: Demam
+    backNl: Koorts
+    tags:
+      - kesehatan
+  - frontId: Dokter gigi
+    backNl: Tandarts
+    tags:
+      - kesehatan
+  - frontId: Rumah sakit
+    backNl: Ziekenhuis
+    tags:
+      - kesehatan
+  - frontId: Resep obat
+    backNl: Recept
+    exampleId: Saya butuh resep dari dokter.
+    exampleNl: Ik heb een recept van de dokter nodig.
+    tags:
+      - kesehatan
+  # --- Extra A1: time & weather ---
+  - frontId: Senin
+    backNl: Maandag
+    tags:
+      - waktu
+  - frontId: Selasa
+    backNl: Dinsdag
+    tags:
+      - waktu
+  - frontId: Rabu
+    backNl: Woensdag
+    tags:
+      - waktu
+  - frontId: Kamis
+    backNl: Donderdag
+    tags:
+      - waktu
+  - frontId: Jumat
+    backNl: Vrijdag
+    tags:
+      - waktu
+  - frontId: Sabtu
+    backNl: Zaterdag
+    tags:
+      - waktu
+  - frontId: Minggu (hari)
+    backNl: Zondag
+    tags:
+      - waktu
+  - frontId: Awal / pagi-pagi
+    backNl: Vroeg
+    tags:
+      - waktu
+  - frontId: Terlambat (waktu)
+    backNl: Te laat
+    exampleId: Saya datang terlambat.
+    exampleNl: Ik kom te laat.
+    tags:
+      - waktu
+  - frontId: Berangin
+    backNl: Winderig
+    tags:
+      - cuaca
+  - frontId: Cerah / matahari
+    backNl: Zonnig
+    tags:
+      - cuaca
+  - frontId: Salju
+    backNl: Sneeuw
+    tags:
+      - cuaca
+  # --- Extra A1: city & intro ---
+  - frontId: Taman
+    backNl: Park
+    tags:
+      - kota
+  - frontId: Bank
+    backNl: Bank
+    tags:
+      - kota
+  - frontId: ATM / mesin uang
+    backNl: Geldautomaat
+    tags:
+      - kota
+      - belanja
+  - frontId: Polisi
+    backNl: Politie
+    tags:
+      - kota
+  - frontId: Kolam renang
+    backNl: Zwembad
+    tags:
+      - kota
+  - frontId: Saya sudah menikah
+    backNl: Ik ben getrouwd
+    tags:
+      - perkenalan
+  - frontId: Saya punya anak
+    backNl: Ik heb kinderen
+    tags:
+      - perkenalan
+  - frontId: Nomor telepon saya…
+    backNl: Mijn telefoonnummer is…
+    tags:
+      - perkenalan
