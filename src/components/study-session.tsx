@@ -161,33 +161,35 @@ export function StudySession({
             </p>
           ) : null}
 
-          {!revealed ? (
-            <button
-              type="button"
-              className="btn btn--primary btn--wide"
-              onClick={() => setRevealed(true)}
-            >
-              {dict.showAnswer}
-            </button>
-          ) : (
-            <div className="rating-row">
-              {RATING_KEYS.map((rating) => {
-                const item = dict.ratings[rating];
-                return (
-                  <button
-                    key={rating}
-                    type="button"
-                    className={`rating-btn rating-btn--${rating}`}
-                    disabled={pending}
-                    onClick={() => onRate(rating)}
-                  >
-                    <span className="rating-btn__label">{item.label}</span>
-                    <span className="rating-btn__hint">{item.hint}</span>
-                  </button>
-                );
-              })}
-            </div>
-          )}
+          <div className="study__actions">
+            {!revealed ? (
+              <button
+                type="button"
+                className="btn btn--primary btn--wide"
+                onClick={() => setRevealed(true)}
+              >
+                {dict.showAnswer}
+              </button>
+            ) : (
+              <div className="rating-row">
+                {RATING_KEYS.map((rating) => {
+                  const item = dict.ratings[rating];
+                  return (
+                    <button
+                      key={rating}
+                      type="button"
+                      className={`rating-btn rating-btn--${rating}`}
+                      disabled={pending}
+                      onClick={() => onRate(rating)}
+                    >
+                      <span className="rating-btn__label">{item.label}</span>
+                      <span className="rating-btn__hint">{item.hint}</span>
+                    </button>
+                  );
+                })}
+              </div>
+            )}
+          </div>
         </>
       )}
     </div>

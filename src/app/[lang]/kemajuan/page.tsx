@@ -20,7 +20,7 @@ export default async function KemajuanPage({ params }: KemajuanPageProps) {
 
   return (
     <div className="app-shell">
-      <AppNav locale={lang} dict={dict} />
+      <AppNav locale={lang} dict={dict} active="progress" />
       <main className="app-main progress-page">
         <h1>{dict.progress.title}</h1>
         <p className="lede">{dict.progress.lede}</p>

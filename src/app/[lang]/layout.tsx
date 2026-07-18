@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Figtree, Instrument_Serif } from "next/font/google";
 import { notFound } from "next/navigation";
 import {
@@ -8,6 +8,14 @@ import {
   locales,
 } from "@/lib/i18n/dictionaries";
 import "../globals.css";
+
+/** Phone-first viewport — safe-area for notched devices. */
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  viewportFit: "cover",
+  themeColor: "#1b3a4b",
+};
 
 const instrument = Instrument_Serif({
   variable: "--font-instrument",

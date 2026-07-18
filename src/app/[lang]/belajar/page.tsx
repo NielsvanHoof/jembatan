@@ -25,9 +25,9 @@ export default async function BelajarPage({
   const cards = await getDueCards(direction, { practiceAll });
 
   return (
-    <div className="app-shell">
-      <AppNav locale={lang} dict={dict} />
-      <main className="app-main">
+    <div className="app-shell app-shell--study">
+      <AppNav locale={lang} dict={dict} active="study" />
+      <main className="app-main app-main--study">
         <StudySession
           key={`${direction}-${practiceAll ? "all" : "due"}`}
           initialCards={cards}

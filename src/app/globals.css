@@ -40,18 +40,31 @@
 
 html {
   height: 100%;
+  /* Avoid horizontal scroll from full-bleed backgrounds / overflow */
+  overflow-x: clip;
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
 }
 
 body {
-  min-height: 100%;
+  min-height: 100dvh;
   margin: 0;
   color: var(--foreground);
   font-family: var(--font-body), system-ui, sans-serif;
+  /* Phone: no fixed attachment (janky on iOS Safari) */
   background:
     radial-gradient(120% 80% at 10% -10%, #ffe8bf 0%, transparent 42%),
     radial-gradient(90% 70% at 100% 0%, #c5dce8 0%, transparent 45%),
     linear-gradient(180deg, var(--chalk) 0%, var(--foam) 55%, #e4eef3 100%);
-  background-attachment: fixed;
+  /* Comfortable default tap; remove gray flash on iOS */
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+}
+
+@media (min-width: 768px) {
+  body {
+    background-attachment: fixed;
+  }
 }
 
 /* Soft paper grain so the page is not a flat fill */
@@ -86,7 +99,11 @@ a:hover {
   min-height: 100dvh;
   display: flex;
   flex-direction: column;
-  padding: 1.25rem 1.25rem 2rem;
+  /* Safe areas for notched phones */
+  padding: max(0.85rem, env(safe-area-inset-top))
+    max(1rem, env(safe-area-inset-right))
+    max(1.5rem, env(safe-area-inset-bottom))
+    max(1rem, env(safe-area-inset-left));
 }
 
 .landing__top {
@@ -97,7 +114,8 @@ a:hover {
 .app-nav__right {
   display: flex;
   align-items: center;
-  gap: 0.85rem;
+  gap: 0.65rem;
+  min-width: 0;
 }
 
 /* UI language toggle (ID / EN) — separate from study direction */
@@ -123,7 +141,10 @@ a:hover {
   font-size: 0.75rem;
   font-weight: 700;
   letter-spacing: 0.06em;
-  padding: 0.35rem 0.55rem;
+  /* ≥44px touch height on phone */
+  min-height: 2.5rem;
+  min-width: 2.5rem;
+  padding: 0.35rem 0.65rem;
   border-radius: 999px;
   cursor: pointer;
 }
@@ -150,12 +171,13 @@ a:hover {
 
 .landing__brand {
   font-family: var(--font-display), Georgia, serif;
-  font-size: clamp(3.4rem, 12vw, 5.6rem);
+  /* Slightly tighter on small phones so headline + CTAs stay in first viewport */
+  font-size: clamp(3rem, 14vw, 5.6rem);
   font-weight: 400;
   letter-spacing: -0.03em;
   line-height: 0.95;
   color: var(--canal);
-  margin: 0 0 1.25rem;
+  margin: 0 0 1rem;
 }
 
 .landing__bridge {
@@ -211,17 +233,26 @@ a:hover {
 }
 
 .landing__lede {
-  margin: 0 0 2rem;
-  font-size: 1.05rem;
+  margin: 0 0 1.5rem;
+  font-size: 1.02rem;
   line-height: 1.55;
   color: color-mix(in oklab, var(--ink) 78%, transparent);
-  max-width: 32ch;
+  max-width: 34ch;
 }
 
 .landing__cta {
   display: flex;
-  flex-wrap: wrap;
-  gap: 0.75rem;
+  flex-direction: column;
+  gap: 0.65rem;
+  width: 100%;
+}
+
+@media (min-width: 480px) {
+  .landing__cta {
+    flex-direction: row;
+    flex-wrap: wrap;
+    width: auto;
+  }
 }
 
 /* —— Shared chrome —— */
@@ -231,34 +262,76 @@ a:hover {
   min-height: 100dvh;
   display: flex;
   flex-direction: column;
+  /* Room for phone bottom tab bar when present */
+  padding-bottom: env(safe-area-inset-bottom);
+}
+
+.app-shell:has(.app-tabbar) {
+  padding-bottom: calc(4.25rem + env(safe-area-inset-bottom));
+}
+
+.app-shell--study {
+  /* Study fills the screen between top bar and tab bar */
+  height: 100dvh;
+  max-height: 100dvh;
+  overflow: hidden;
 }
 
 .app-nav {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 1rem;
-  padding: 1rem 1.25rem;
-  flex-wrap: wrap;
+  gap: 0.75rem;
+  padding: max(0.65rem, env(safe-area-inset-top))
+    max(1rem, env(safe-area-inset-right)) 0.65rem
+    max(1rem, env(safe-area-inset-left));
+  flex-shrink: 0;
 }
 
 .app-nav__brand {
   font-family: var(--font-display), Georgia, serif;
-  font-size: 1.45rem;
+  font-size: 1.35rem;
   color: var(--canal);
   text-decoration: none;
+  /* Keep brand tappable without colliding with links */
+  padding: 0.25rem 0;
 }
 
+/* Inline links are desktop-only — phone uses bottom tab bar */
 .app-nav__links {
-  display: flex;
+  display: none;
   align-items: center;
   gap: 1rem;
   font-size: 0.95rem;
 }
 
+@media (min-width: 720px) {
+  .app-nav__links {
+    display: flex;
+  }
+
+  .app-shell:has(.app-tabbar) {
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+
+  .app-shell--study {
+    height: auto;
+    max-height: none;
+    overflow: visible;
+  }
+}
+
 .app-nav__links a {
   text-decoration: none;
   color: var(--ink);
+  min-height: 2.5rem;
+  display: inline-flex;
+  align-items: center;
+}
+
+.app-nav__links a.is-active {
+  color: var(--canal);
+  font-weight: 700;
 }
 
 .app-nav__links a:hover {
@@ -272,13 +345,77 @@ a:hover {
   font: inherit;
   cursor: pointer;
   padding: 0;
+  min-height: 2.5rem;
+}
+
+/* Phone bottom tabs — thumbs reach Study / Progress / Logout */
+.app-tabbar {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 40;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.15rem;
+  padding: 0.4rem max(0.5rem, env(safe-area-inset-right))
+    max(0.4rem, env(safe-area-inset-bottom))
+    max(0.5rem, env(safe-area-inset-left));
+  background: color-mix(in oklab, white 88%, var(--mist));
+  border-top: 1px solid color-mix(in oklab, var(--canal) 16%, transparent);
+  backdrop-filter: blur(10px);
+}
+
+.app-tabbar__item,
+.app-tabbar__item-form .app-tabbar__item {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 2.85rem;
+  padding: 0.35rem 0.4rem;
+  border: none;
+  border-radius: 0.7rem;
+  background: transparent;
+  color: var(--bridge);
+  font: inherit;
+  font-size: 0.82rem;
+  font-weight: 700;
+  text-decoration: none;
+  cursor: pointer;
+  width: 100%;
+}
+
+.app-tabbar__item.is-active {
+  background: color-mix(in oklab, var(--canal) 12%, transparent);
+  color: var(--canal);
+}
+
+.app-tabbar__item-form {
+  margin: 0;
+  display: flex;
+}
+
+/* Desktop: top links only — must come after .app-tabbar { display: grid } */
+@media (min-width: 720px) {
+  .app-tabbar {
+    display: none;
+  }
 }
 
 .app-main {
   flex: 1;
   width: min(40rem, 100%);
   margin: 0 auto;
-  padding: 0.5rem 1.25rem 2.5rem;
+  padding: 0.35rem max(1rem, env(safe-area-inset-right)) 1.5rem
+    max(1rem, env(safe-area-inset-left));
+  min-width: 0;
+}
+
+.app-main--study {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  padding-bottom: 0.75rem;
 }
 
 /* —— Buttons —— */
@@ -287,9 +424,10 @@ a:hover {
   align-items: center;
   justify-content: center;
   gap: 0.4rem;
-  min-height: 2.85rem;
-  padding: 0.65rem 1.25rem;
-  border-radius: 0.65rem;
+  /* Apple HIG / Material: ~44–48px touch targets */
+  min-height: 3rem;
+  padding: 0.7rem 1.25rem;
+  border-radius: 0.75rem;
   border: 1px solid transparent;
   font: inherit;
   font-weight: 600;
@@ -334,6 +472,21 @@ a:hover {
   width: 100%;
 }
 
+/* Full-width CTAs on phone (after .btn so specificity order stays valid) */
+.landing__cta .btn,
+.study-empty__actions .btn,
+.progress-cta .btn {
+  width: 100%;
+}
+
+@media (min-width: 480px) {
+  .landing__cta .btn,
+  .study-empty__actions .btn,
+  .progress-cta .btn {
+    width: auto;
+  }
+}
+
 /* —— Auth —— */
 .auth-page {
   animation: rise-in 700ms cubic-bezier(0.22, 1, 0.36, 1) both;
@@ -369,13 +522,16 @@ a:hover {
 }
 
 .field input {
-  min-height: 2.85rem;
-  padding: 0.65rem 0.85rem;
+  min-height: 3rem;
+  padding: 0.7rem 0.9rem;
   border: 1px solid color-mix(in oklab, var(--canal) 28%, transparent);
-  border-radius: 0.65rem;
+  border-radius: 0.75rem;
   background: color-mix(in oklab, white 80%, var(--mist));
   color: var(--ink);
   font: inherit;
+  /* ≥16px prevents iOS Safari zooming the page on focus */
+  font-size: 1rem;
+  width: 100%;
 }
 
 .form-error {
@@ -392,8 +548,11 @@ a:hover {
 
 /* —— Study —— */
 .study {
-  display: grid;
-  gap: 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+  flex: 1;
+  min-height: 0;
   animation: rise-in 650ms cubic-bezier(0.22, 1, 0.36, 1) both;
 }
 
@@ -401,14 +560,21 @@ a:hover {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 0.75rem;
+  gap: 0.5rem;
+  flex-shrink: 0;
 }
 
 .study__count {
   margin: 0;
-  font-size: 0.9rem;
+  font-size: 0.85rem;
   color: var(--bridge);
   font-weight: 600;
+  white-space: nowrap;
+}
+
+.study__actions {
+  flex-shrink: 0;
+  padding-top: 0.15rem;
 }
 
 .sr-only {
@@ -438,10 +604,11 @@ a:hover {
   background: transparent;
   color: var(--bridge);
   font: inherit;
-  font-size: 0.85rem;
+  font-size: 0.8rem;
   font-weight: 700;
   letter-spacing: 0.02em;
-  padding: 0.45rem 0.85rem;
+  min-height: 2.5rem;
+  padding: 0.4rem 0.7rem;
   border-radius: 999px;
   cursor: pointer;
 }
@@ -452,8 +619,10 @@ a:hover {
 }
 
 .flashcard {
-  min-height: 16rem;
-  padding: 1.75rem 1.4rem;
+  /* Grow to fill phone screen between toolbar and actions */
+  flex: 1 1 auto;
+  min-height: 12rem;
+  padding: 1.35rem 1.15rem;
   border-radius: 1.1rem;
   background: linear-gradient(
     165deg,
@@ -466,8 +635,17 @@ a:hover {
   display: flex;
   flex-direction: column;
   justify-content: center;
-  gap: 0.75rem;
+  gap: 0.65rem;
   transition: transform 220ms ease;
+  overflow: auto;
+}
+
+@media (min-width: 720px) {
+  .flashcard {
+    min-height: 16rem;
+    flex: 0 1 auto;
+    padding: 1.75rem 1.4rem;
+  }
 }
 
 .flashcard.is-revealed {
@@ -514,9 +692,10 @@ a:hover {
 }
 
 .rating-row {
+  /* Phone: 2×2 grid of fat thumbs */
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 0.65rem;
+  gap: 0.55rem;
 }
 
 @media (min-width: 640px) {
@@ -527,10 +706,10 @@ a:hover {
 
 .rating-btn {
   display: grid;
-  gap: 0.15rem;
-  min-height: 3.4rem;
-  padding: 0.55rem 0.5rem;
-  border-radius: 0.75rem;
+  gap: 0.1rem;
+  min-height: 3.6rem;
+  padding: 0.6rem 0.45rem;
+  border-radius: 0.8rem;
   border: 1px solid transparent;
   background: white;
   cursor: pointer;
@@ -599,8 +778,15 @@ a:hover {
 
 .study-empty__actions {
   display: flex;
-  flex-wrap: wrap;
-  gap: 0.75rem;
+  flex-direction: column;
+  gap: 0.65rem;
+}
+
+@media (min-width: 480px) {
+  .study-empty__actions {
+    flex-direction: row;
+    flex-wrap: wrap;
+  }
 }
 
 /* —— Progress —— */
@@ -646,7 +832,7 @@ a:hover {
 }
 
 .progress-cta {
-  margin-top: 2rem;
+  margin-top: 1.75rem;
 }
 
 @keyframes rise-in {

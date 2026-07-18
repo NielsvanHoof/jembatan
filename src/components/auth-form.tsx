@@ -69,7 +69,11 @@ export function AuthForm({ mode, locale, dict }: AuthFormProps) {
         </p>
       ) : null}
 
-      <button type="submit" className="btn btn--primary" disabled={pending}>
+      <button
+        type="submit"
+        className="btn btn--primary btn--wide"
+        disabled={pending}
+      >
         {pending
           ? dict.pending
           : mode === "login"
