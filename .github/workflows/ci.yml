@@ -1,0 +1,39 @@
+name: CI
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    env:
+      # Build does not hit a real DB (lazy getDb), but Auth.js / env need values.
+      DATABASE_URL: postgresql://ci:ci@localhost:5432/jembatan
+      AUTH_SECRET: ci-build-secret-not-for-production-use
+      AUTH_URL: http://localhost:3000
+      # Source maps upload — set repo secret SENTRY_AUTH_TOKEN (never commit the token).
+      SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
+      SENTRY_ORG: niels-van-hoof
+      SENTRY_PROJECT: jembatan
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+
+      - name: Install
+        run: npm ci
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Typecheck
+        run: npm run typecheck
+
+      - name: Build
+        run: npm run build

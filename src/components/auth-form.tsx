@@ -58,7 +58,7 @@ export function AuthForm({ mode, locale, dict }: AuthFormProps) {
           type="password"
           autoComplete={mode === "login" ? "current-password" : "new-password"}
           required
-          minLength={6}
+          minLength={8}
           placeholder={dict.passwordPlaceholder}
         />
       </label>

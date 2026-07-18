@@ -14,9 +14,10 @@ import {
 import { cards, decks, users } from "../src/db/schema";
 
 async function main() {
-  const url = process.env.DATABASE_URL;
+  // Prefer Neon direct URL when present (more reliable for bulk inserts).
+  const url = process.env.DATABASE_URL_UNPOOLED || process.env.DATABASE_URL;
   if (!url) {
-    throw new Error("DATABASE_URL is required");
+    throw new Error("DATABASE_URL (or DATABASE_URL_UNPOOLED) is required");
   }
 
   const client = postgres(url, { max: 1 });

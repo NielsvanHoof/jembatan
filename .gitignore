@@ -39,6 +39,9 @@ next-env.d.ts
 # vercel
 .vercel/
 
+# local IDE / MCP config
+.cursor/
+
 # os / editor
 .DS_Store
 Thumbs.db
@@ -56,3 +59,6 @@ drizzle/meta/*.json.bak
 .cache/
 tmp/
 temp/
+
+# Sentry Config File
+.env.sentry-build-plugin

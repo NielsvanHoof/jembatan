@@ -82,6 +82,12 @@ export type Dictionary = {
     totalCards: string;
     startSession: string;
   };
+  error: {
+    title: string;
+    body: string;
+    retry: string;
+    home: string;
+  };
 };
 
 const id: Dictionary = {
@@ -124,7 +130,7 @@ const id: Dictionary = {
     email: "Email",
     emailPlaceholder: "nama@email.com",
     password: "Kata sandi",
-    passwordPlaceholder: "Minimal 6 karakter",
+    passwordPlaceholder: "Minimal 8 karakter",
     submitLogin: "Masuk",
     submitRegister: "Buat akun",
     pending: "Sebentar…",
@@ -134,7 +140,7 @@ const id: Dictionary = {
     loginLink: "Masuk",
     errors: {
       invalid_input:
-        "Periksa kembali nama, email, dan kata sandi (min. 6 karakter).",
+        "Periksa kembali nama, email, dan kata sandi (min. 8 karakter).",
       email_taken: "Email ini sudah terdaftar. Silakan masuk saja.",
       register_signin_failed:
         "Akun dibuat, tapi masuk gagal. Coba masuk manual.",
@@ -174,6 +180,12 @@ const id: Dictionary = {
     mastered: "Sudah menguasai",
     totalCards: "Total kartu (kedua arah)",
     startSession: "Mulai sesi belajar",
+  },
+  error: {
+    title: "Ada yang tidak beres",
+    body: "Halaman ini gagal dimuat. Coba lagi, atau kembali ke beranda.",
+    retry: "Coba lagi",
+    home: "Ke beranda",
   },
 };
 
@@ -217,7 +229,7 @@ const en: Dictionary = {
     email: "Email",
     emailPlaceholder: "name@email.com",
     password: "Password",
-    passwordPlaceholder: "At least 6 characters",
+    passwordPlaceholder: "At least 8 characters",
     submitLogin: "Log in",
     submitRegister: "Create account",
     pending: "One moment…",
@@ -227,7 +239,7 @@ const en: Dictionary = {
     loginLink: "Log in",
     errors: {
       invalid_input:
-        "Check your name, email, and password (min. 6 characters).",
+        "Check your name, email, and password (min. 8 characters).",
       email_taken: "This email is already registered. Try logging in.",
       register_signin_failed:
         "Account created, but sign-in failed. Try logging in manually.",
@@ -267,6 +279,12 @@ const en: Dictionary = {
     mastered: "Mastered",
     totalCards: "Total cards (both directions)",
     startSession: "Start a study session",
+  },
+  error: {
+    title: "Something went wrong",
+    body: "This page failed to load. Try again, or go back home.",
+    retry: "Try again",
+    home: "Go home",
   },
 };
 

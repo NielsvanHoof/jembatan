@@ -1,32 +1,33 @@
 # Jembatan
 
-Belajar bahasa Belanda langsung dari Indonesia (dan sebaliknya) — kartu kosakata A1 untuk kehidupan sehari-hari di Belanda, dengan pengulangan berjarak (SM-2).
+Indonesian ↔ Dutch flashcards (A1 daily life in the Netherlands) with SM-2 spaced repetition.
 
-UI chrome is localized with Next.js `[lang]` routing (`/id/...`, `/en/...`). Use the ID/EN toggle, or open `/en` to test in English. Flashcard content stays Indonesian ↔ Dutch.
+UI chrome is localized via Next.js `[lang]` routing (`/id/...`, `/en/...`). Flashcard content stays Indonesian ↔ Dutch.
 
 ## Stack
 
 - Next.js (App Router) + React
 - Postgres + Drizzle ORM
-- Auth.js (email + kata sandi)
+- Auth.js (email + password)
+- Sentry (optional, production)
 
-## Setup lokal
+## Local setup
 
-1. Salin env:
+1. Copy env:
 
 ```bash
-cp .env.example .env
+cp .env.example .env.local
 ```
 
-Isi `AUTH_SECRET` (mis. `openssl rand -base64 32`) dan biarkan `DATABASE_URL` default jika pakai Docker di bawah.
+Set `AUTH_SECRET` (`openssl rand -base64 32`). Keep `DATABASE_URL` for Docker below.
 
-2. Jalankan Postgres:
+2. Start Postgres:
 
 ```bash
 docker compose up -d
 ```
 
-3. Migrasi + seed deck (~118 kartu) dan user opsional:
+3. Migrate + seed (~118 cards, optional seed user):
 
 ```bash
 npm install
@@ -40,22 +41,75 @@ npm run db:seed
 npm run dev
 ```
 
-Buka [http://localhost:3000](http://localhost:3000).
+Open [http://localhost:3000](http://localhost:3000) (redirects to `/id` or `/en`).
 
-Akun seed (jika diisi di `.env`): lihat `SEED_USER_EMAIL` / `SEED_USER_PASSWORD`.
+## Routes
 
-## Skrip berguna
+| Path | Purpose |
+|------|---------|
+| `/id`, `/en` | Landing |
+| `/id/daftar`, `/en/daftar` | Register |
+| `/id/masuk`, `/en/masuk` | Log in |
+| `/id/belajar`, `/en/belajar` | Study session |
+| `/id/kemajuan`, `/en/kemajuan` | Progress |
 
-| Perintah | Fungsi |
-|----------|--------|
-| `npm run db:generate` | Buat migrasi dari schema |
-| `npm run db:migrate` | Terapkan migrasi |
-| `npm run db:seed` | Isi deck A1 + user seed |
+## Deploy on Vercel
+
+### 1. Database (Neon)
+
+This repo is wired for Neon (see `.neon` for org/project ids).
+
+```bash
+# Refresh connection strings into .env.local
+npx neonctl@latest env pull
+
+# Migrate + seed (drizzle-kit prefers DATABASE_URL_UNPOOLED)
+npm run db:migrate
+npm run db:seed
+```
+
+Copy the **pooled** `DATABASE_URL` from `.env.local` into Vercel.  
+Do **not** run migrate on every Vercel build.
+
+### 2. Vercel environment variables
+
+Set for **Production** and **Preview**:
+
+| Variable | Required | Notes |
+|----------|----------|--------|
+| `DATABASE_URL` | yes | Neon pooled URL |
+| `AUTH_SECRET` | yes | `openssl rand -base64 32` |
+| `AUTH_URL` | yes | e.g. `https://your-app.vercel.app` |
+| `SENTRY_DSN` | no | Server/edge errors |
+| `NEXT_PUBLIC_SENTRY_DSN` | no | Browser errors (often same as DSN) |
+| `SENTRY_AUTH_TOKEN` | no | Source maps on build |
+| `SENTRY_ORG` / `SENTRY_PROJECT` | no | With auth token |
+
+### 3. Sentry (optional)
+
+1. Create a Next.js project in [Sentry](https://sentry.io).
+2. Add DSN (+ optional auth token for source maps) to Vercel.
+3. For GitHub Actions source maps, set repo secret `SENTRY_AUTH_TOKEN` (Settings → Secrets → Actions). Never commit the token.
+4. Redeploy. Errors from `error.tsx` / `global-error.tsx` and server requests are reported when a DSN is set.
+
+### 4. Deploy
+
+Connect the GitHub repo to Vercel (framework: Next.js). Build command: `npm run build` (default).
+
+## Scripts
+
+| Command | Purpose |
+|---------|---------|
+| `npm run dev` | Local next dev |
+| `npm run build` | Production build |
+| `npm run lint` | Biome check |
+| `npm run typecheck` | `tsc --noEmit` |
+| `npm run db:migrate` | Apply Drizzle migrations |
+| `npm run db:seed` | Seed A1 deck (+ optional user) |
 | `npm run db:studio` | Drizzle Studio |
 
-## Rute
+## Security notes
 
-- `/` — landing
-- `/daftar` / `/masuk` — akun
-- `/belajar` — sesi kartu (ID→NL / NL→ID)
-- `/kemajuan` — ringkasan progres
+- Password minimum length is **8**.
+- Security headers (CSP, frame deny, nosniff, etc.) are set in `next.config.ts`.
+- DB client uses `max: 1` + `prepare: false` for serverless poolers.

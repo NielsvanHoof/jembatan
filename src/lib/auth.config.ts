@@ -7,7 +7,7 @@ import { pathFor, stripLocalePrefix } from "@/lib/i18n/paths";
  * Used by proxy; full providers live in auth.ts.
  */
 export const authConfig = {
-  // Explicit so Edge proxy + Node handlers both see the same secret.
+  // Required in production / Vercel — see .env.example (AUTH_SECRET).
   secret: process.env.AUTH_SECRET,
   pages: {
     // Fallback when Auth.js itself redirects; proxy uses the active locale.
