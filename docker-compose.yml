@@ -1,0 +1,20 @@
+# Local Postgres for development.
+# Start: docker compose up -d
+#
+# Postgres 18+ expects the volume on /var/lib/postgresql (not .../data),
+# so major-version data dirs work with pg_upgrade.
+services:
+  db:
+    image: postgres:18-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: jembatan
+    ports:
+      - "5432:5432"
+    volumes:
+      - jembatan_pg:/var/lib/postgresql
+
+volumes:
+  jembatan_pg:

@@ -1,0 +1,38 @@
+# Dependencies & installs — huge, not useful as context
+node_modules/
+
+# Next.js build output
+.next/
+out/
+build/
+dist/
+.turbo/
+
+# Lockfile noise (package.json is enough)
+package-lock.json
+yarn.lock
+pnpm-lock.yaml
+
+# Env / secrets — never index
+.env
+.env.*
+!.env.example
+
+# Generated / binary / media noise
+*.tsbuildinfo
+next-env.d.ts
+public/**
+!public/.gitkeep
+
+# Logs & caches
+*.log
+coverage/
+.cache/
+.vercel/
+
+# OS junk
+.DS_Store
+Thumbs.db
+
+# Large generated drizzle snapshots (migrations SQL still readable)
+drizzle/meta/
