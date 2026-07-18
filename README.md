@@ -96,6 +96,8 @@ Set for **Production** and **Preview**:
 
 Connect the GitHub repo to Vercel (framework: Next.js). Build command: `npm run build` (default).
 
+Serverless functions run in **Frankfurt (`fra1`)** via [`vercel.json`](vercel.json), next to Neon (`eu-central-1`). Builds may still show `iad1` — that only affects the build machine, not request latency.
+
 ## Scripts
 
 | Command | Purpose |
