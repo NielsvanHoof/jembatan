@@ -85,12 +85,12 @@ export function AuthForm({ mode, locale, dict }: AuthFormProps) {
         {mode === "login" ? (
           <>
             {dict.noAccount}{" "}
-            <Link href={pathFor(locale, "/daftar")}>{dict.registerLink}</Link>
+            <Link href={pathFor(locale, "/register")}>{dict.registerLink}</Link>
           </>
         ) : (
           <>
             {dict.hasAccount}{" "}
-            <Link href={pathFor(locale, "/masuk")}>{dict.loginLink}</Link>
+            <Link href={pathFor(locale, "/login")}>{dict.loginLink}</Link>
           </>
         )}
       </p>

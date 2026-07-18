@@ -18,8 +18,8 @@ export default async function HomePage({ params }: HomePageProps) {
   const session = await auth();
   const dict = getDictionary(lang);
   const primaryHref = session?.user
-    ? pathFor(lang, "/belajar")
-    : pathFor(lang, "/daftar");
+    ? pathFor(lang, "/study")
+    : pathFor(lang, "/register");
   const primaryLabel = session?.user
     ? dict.landing.continue
     : dict.landing.start;
@@ -48,11 +48,11 @@ export default async function HomePage({ params }: HomePageProps) {
             {primaryLabel}
           </Link>
           {!session?.user ? (
-            <Link href={pathFor(lang, "/masuk")} className="btn btn--ghost">
+            <Link href={pathFor(lang, "/login")} className="btn btn--ghost">
               {dict.landing.hasAccount}
             </Link>
           ) : (
-            <Link href={pathFor(lang, "/kemajuan")} className="btn btn--ghost">
+            <Link href={pathFor(lang, "/progress")} className="btn btn--ghost">
               {dict.landing.seeProgress}
             </Link>
           )}

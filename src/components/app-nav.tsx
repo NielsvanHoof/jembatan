@@ -28,13 +28,13 @@ export async function AppNav({ locale, dict, active }: AppNavProps) {
           {/* Desktop / wider screens keep inline links */}
           <nav className="app-nav__links" aria-label={dict.nav.aria}>
             <Link
-              href={pathFor(locale, "/belajar")}
+              href={pathFor(locale, "/study")}
               className={active === "study" ? "is-active" : undefined}
             >
               {dict.nav.study}
             </Link>
             <Link
-              href={pathFor(locale, "/kemajuan")}
+              href={pathFor(locale, "/progress")}
               className={active === "progress" ? "is-active" : undefined}
             >
               {dict.nav.progress}
@@ -47,7 +47,7 @@ export async function AppNav({ locale, dict, active }: AppNavProps) {
                 </button>
               </form>
             ) : (
-              <Link href={pathFor(locale, "/masuk")}>{dict.nav.login}</Link>
+              <Link href={pathFor(locale, "/login")}>{dict.nav.login}</Link>
             )}
           </nav>
         </div>
@@ -57,13 +57,13 @@ export async function AppNav({ locale, dict, active }: AppNavProps) {
       {loggedIn ? (
         <nav className="app-tabbar" aria-label={dict.nav.aria}>
           <Link
-            href={pathFor(locale, "/belajar")}
+            href={pathFor(locale, "/study")}
             className={`app-tabbar__item${active === "study" ? " is-active" : ""}`}
           >
             {dict.nav.study}
           </Link>
           <Link
-            href={pathFor(locale, "/kemajuan")}
+            href={pathFor(locale, "/progress")}
             className={`app-tabbar__item${active === "progress" ? " is-active" : ""}`}
           >
             {dict.nav.progress}

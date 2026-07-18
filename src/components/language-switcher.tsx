@@ -29,7 +29,7 @@ export function LanguageSwitcher({
     }
 
     const segments = pathname.split("/");
-    // pathname looks like "", "id", "belajar", ...
+    // pathname looks like "", "id", "study", ...
     if (segments.length > 1 && locales.includes(segments[1] as Locale)) {
       segments[1] = next;
     } else {

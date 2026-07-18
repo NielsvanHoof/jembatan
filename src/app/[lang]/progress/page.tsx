@@ -51,7 +51,7 @@ export default async function KemajuanPage({ params }: KemajuanPageProps) {
         </ul>
 
         <div className="progress-cta">
-          <Link href={pathFor(lang, "/belajar")} className="btn btn--primary">
+          <Link href={pathFor(lang, "/study")} className="btn btn--primary">
             {dict.progress.startSession}
           </Link>
         </div>

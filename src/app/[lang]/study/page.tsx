@@ -4,23 +4,23 @@ import { AppNav } from "@/components/app-nav";
 import { StudySession } from "@/components/study-session";
 import { getDictionary, isLocale } from "@/lib/i18n/dictionaries";
 
-type BelajarPageProps = {
+type StudyPageProps = {
   params: Promise<{ lang: string }>;
-  searchParams: Promise<{ arah?: string; latihan?: string }>;
+  searchParams: Promise<{ direction?: string; practice?: string }>;
 };
 
-export default async function BelajarPage({
+export default async function StudyPage({
   params,
   searchParams,
-}: BelajarPageProps) {
+}: StudyPageProps) {
   const { lang } = await params;
   if (!isLocale(lang)) {
     notFound();
   }
 
   const query = await searchParams;
-  const direction = await parseDirection(query.arah);
-  const practiceAll = query.latihan === "1";
+  const direction = await parseDirection(query.direction);
+  const practiceAll = query.practice === "1";
   const dict = getDictionary(lang);
   const cards = await getDueCards(direction, { practiceAll });
 

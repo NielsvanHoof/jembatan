@@ -12,6 +12,14 @@ import {
 
 const { auth } = NextAuth(authConfig);
 
+/** Old Indonesian route segments → English (bookmarks / shared links). */
+const LEGACY_PATHS: Record<string, string> = {
+  "/belajar": "/study",
+  "/kemajuan": "/progress",
+  "/masuk": "/login",
+  "/daftar": "/register",
+};
+
 /**
  * 1) Ensure every page URL has /id or /en (Next.js i18n routing).
  * 2) Protect study routes and bounce auth pages when already signed in.
@@ -40,18 +48,28 @@ export default auth((req) => {
   const barePath = stripLocalePrefix(pathname);
   const isLoggedIn = !!req.auth;
 
+  // Redirect legacy Indonesian path names to English.
+  for (const [legacy, next] of Object.entries(LEGACY_PATHS)) {
+    if (barePath === legacy || barePath.startsWith(`${legacy}/`)) {
+      const suffix = barePath.slice(legacy.length);
+      const url = req.nextUrl.clone();
+      url.pathname = pathFor(locale, `${next}${suffix}`);
+      return NextResponse.redirect(url);
+    }
+  }
+
   if (
     !isLoggedIn &&
-    (barePath.startsWith("/belajar") || barePath.startsWith("/kemajuan"))
+    (barePath.startsWith("/study") || barePath.startsWith("/progress"))
   ) {
-    const loginUrl = new URL(pathFor(locale, "/masuk"), req.nextUrl.origin);
-    loginUrl.searchParams.set("dari", pathname);
+    const loginUrl = new URL(pathFor(locale, "/login"), req.nextUrl.origin);
+    loginUrl.searchParams.set("from", pathname);
     return NextResponse.redirect(loginUrl);
   }
 
-  if (isLoggedIn && (barePath === "/masuk" || barePath === "/daftar")) {
+  if (isLoggedIn && (barePath === "/login" || barePath === "/register")) {
     return NextResponse.redirect(
-      new URL(pathFor(locale, "/belajar"), req.nextUrl.origin),
+      new URL(pathFor(locale, "/study"), req.nextUrl.origin),
     );
   }
 

@@ -37,11 +37,11 @@ export function StudySession({
 
   function switchDirection(next: StudyDirection) {
     const params = new URLSearchParams();
-    params.set("arah", next);
+    params.set("direction", next);
     if (practiceAll) {
-      params.set("latihan", "1");
+      params.set("practice", "1");
     }
-    router.push(`${pathFor(locale, "/belajar")}?${params.toString()}`);
+    router.push(`${pathFor(locale, "/study")}?${params.toString()}`);
   }
 
   function onRate(rating: (typeof RATING_KEYS)[number]) {
@@ -114,13 +114,13 @@ export function StudySession({
           <p>{dict.emptyBody}</p>
           <div className="study-empty__actions">
             <Link
-              href={`${pathFor(locale, "/belajar")}?arah=${direction}&latihan=1`}
+              href={`${pathFor(locale, "/study")}?direction=${direction}&practice=1`}
               className="btn btn--primary"
             >
               {dict.practiceAgain}
             </Link>
             <Link
-              href={pathFor(locale, "/kemajuan")}
+              href={pathFor(locale, "/progress")}
               className="btn btn--ghost"
             >
               {dict.seeProgress}

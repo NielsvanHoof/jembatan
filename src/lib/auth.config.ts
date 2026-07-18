@@ -11,7 +11,7 @@ export const authConfig = {
   secret: process.env.AUTH_SECRET,
   pages: {
     // Fallback when Auth.js itself redirects; proxy uses the active locale.
-    signIn: pathFor(DEFAULT_LOCALE, "/masuk"),
+    signIn: pathFor(DEFAULT_LOCALE, "/login"),
   },
   session: { strategy: "jwt" },
   providers: [],
@@ -19,7 +19,7 @@ export const authConfig = {
     authorized({ auth, request }) {
       const bare = stripLocalePrefix(request.nextUrl.pathname);
       const isProtected =
-        bare.startsWith("/belajar") || bare.startsWith("/kemajuan");
+        bare.startsWith("/study") || bare.startsWith("/progress");
       if (isProtected) {
         return !!auth?.user;
       }

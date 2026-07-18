@@ -5,7 +5,7 @@ import {
   locales,
 } from "@/lib/i18n/dictionaries";
 
-/** Build a localized app path, e.g. pathFor("en", "/belajar") → "/en/belajar". */
+/** Build a localized app path, e.g. pathFor("en", "/study") → "/en/study". */
 export function pathFor(locale: Locale, path = "/"): string {
   const normalized = path.startsWith("/") ? path : `/${path}`;
   if (normalized === "/") {
@@ -20,7 +20,7 @@ export function getLocaleFromPathname(pathname: string): Locale | null {
   return isLocale(segment) ? segment : null;
 }
 
-/** Strip the locale prefix for auth matching (/en/belajar → /belajar). */
+/** Strip the locale prefix for auth matching (/en/study → /study). */
 export function stripLocalePrefix(pathname: string): string {
   const locale = getLocaleFromPathname(pathname);
   if (!locale) {

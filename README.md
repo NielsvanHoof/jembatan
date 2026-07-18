@@ -48,10 +48,10 @@ Open [http://localhost:3000](http://localhost:3000) (redirects to `/id` or `/en`
 | Path | Purpose |
 |------|---------|
 | `/id`, `/en` | Landing |
-| `/id/daftar`, `/en/daftar` | Register |
-| `/id/masuk`, `/en/masuk` | Log in |
-| `/id/belajar`, `/en/belajar` | Study session |
-| `/id/kemajuan`, `/en/kemajuan` | Progress |
+| `/id/register`, `/en/register` | Register |
+| `/id/login`, `/en/login` | Log in |
+| `/id/study`, `/en/study` | Study session |
+| `/id/progress`, `/en/progress` | Progress |
 
 ## Deploy on Vercel
 

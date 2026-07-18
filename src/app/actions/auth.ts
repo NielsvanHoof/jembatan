@@ -75,7 +75,7 @@ export async function registerAction(
     await signIn("credentials", {
       email,
       password: parsed.data.password,
-      redirectTo: pathFor(locale, "/belajar"),
+      redirectTo: pathFor(locale, "/study"),
     });
   } catch (error) {
     // NextAuth throws a redirect on success — rethrow those.
@@ -108,7 +108,7 @@ export async function loginAction(
     await signIn("credentials", {
       email: parsed.data.email.toLowerCase().trim(),
       password: parsed.data.password,
-      redirectTo: pathFor(locale, "/belajar"),
+      redirectTo: pathFor(locale, "/study"),
     });
   } catch (error) {
     if (error instanceof AuthError) {
