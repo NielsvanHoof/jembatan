@@ -60,7 +60,9 @@ export default auth((req) => {
 
   if (
     !isLoggedIn &&
-    (barePath.startsWith("/study") || barePath.startsWith("/progress"))
+    (barePath.startsWith("/study") ||
+      barePath.startsWith("/progress") ||
+      barePath.startsWith("/offline"))
   ) {
     const loginUrl = new URL(pathFor(locale, "/login"), req.nextUrl.origin);
     loginUrl.searchParams.set("from", pathname);

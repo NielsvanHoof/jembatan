@@ -29,6 +29,8 @@ export const users = pgTable("users", {
 export const decks = pgTable("decks", {
   id: uuid("id").defaultRandom().primaryKey(),
   slug: text("slug").notNull().unique(),
+  /** CEFR-ish level for the picker, e.g. A1 / A2 */
+  level: text("level").notNull().default("A1"),
   titleId: text("title_id").notNull(),
   titleNl: text("title_nl").notNull(),
   descriptionId: text("description_id").notNull(),

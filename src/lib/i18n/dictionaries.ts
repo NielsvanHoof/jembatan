@@ -56,11 +56,50 @@ export type Dictionary = {
     done: string;
     emptyTitle: string;
     emptyBody: string;
+    /** Theme-filtered empty state; {theme} is the localized tag label. */
+    emptyTitleTheme: string;
+    emptyBodyTheme: string;
+    /** Shown when nothing is due; {when} filled by relative next-due text. */
+    emptyNextDue: string;
+    nextDueHours: string;
+    nextDueDays: string;
+    nextDueSoon: string;
     practiceAgain: string;
     seeProgress: string;
+    clearTheme: string;
     langId: string;
     langNl: string;
     showAnswer: string;
+    habitDue: string;
+    habitToday: string;
+    habitStreak: string;
+    habitGoalMet: string;
+    themeLegend: string;
+    themeAll: string;
+    outingLabel: string;
+    deckLegend: string;
+    /** Short picker labels keyed by deck slug */
+    deckLabels: {
+      "a1-kehidupan-sehari-hari": string;
+      "a2-werk-administratie": string;
+    };
+    tags: {
+      administrasi: string;
+      arah: string;
+      belanja: string;
+      beleefdheid: string;
+      cafe: string;
+      cuaca: string;
+      dasar: string;
+      kerja: string;
+      kesehatan: string;
+      kota: string;
+      makanan: string;
+      ov: string;
+      perkenalan: string;
+      rumah: string;
+      waktu: string;
+    };
     ratings: {
       again: { label: string; hint: string };
       hard: { label: string; hint: string };
@@ -71,6 +110,16 @@ export type Dictionary = {
       unknown_rating: string;
       card_not_found: string;
     };
+    /** Shown while ratings wait for a network connection. */
+    syncPending: string;
+    syncDone: string;
+  };
+  offline: {
+    loading: string;
+    cachedBanner: string;
+    emptyTitle: string;
+    emptyBody: string;
+    openStudy: string;
   };
   progress: {
     title: string;
@@ -80,7 +129,10 @@ export type Dictionary = {
     learning: string;
     mastered: string;
     totalCards: string;
+    streak: string;
+    dailyGoal: string;
     startSession: string;
+    deckLegend: string;
   };
   error: {
     title: string;
@@ -155,11 +207,48 @@ const id: Dictionary = {
     emptyTitle: "Tidak ada kartu jatuh tempo",
     emptyBody:
       "Hebat — untuk arah ini semuanya sudah dijadwalkan ulang. Istirahat dulu, atau latihan ulang kosakata.",
+    emptyTitleTheme: "Tidak ada kartu {theme} jatuh tempo",
+    emptyBodyTheme:
+      "Semua kartu tema ini sudah dijadwalkan ulang. Coba tema lain, atau latihan ulang.",
+    emptyNextDue: "Kartu berikutnya {when}.",
+    nextDueHours: "dalam ~{n} jam",
+    nextDueDays: "dalam ~{n} hari",
+    nextDueSoon: "segera",
     practiceAgain: "Latihan ulang",
     seeProgress: "Lihat kemajuan",
+    clearTheme: "Semua tema",
     langId: "Indonesia",
     langNl: "Belanda",
     showAnswer: "Tampilkan jawaban",
+    habitDue: "{n} jatuh tempo",
+    habitToday: "{done}/{goal} hari ini",
+    habitStreak: "{n} hari beruntun",
+    habitGoalMet: "Target harian tercapai",
+    themeLegend: "Tema belajar",
+    themeAll: "Semua",
+    outingLabel: "Outing hari ini",
+    deckLegend: "Dek",
+    deckLabels: {
+      "a1-kehidupan-sehari-hari": "A1 · Kehidupan sehari-hari",
+      "a2-werk-administratie": "A2 · Kerja & administrasi",
+    },
+    tags: {
+      administrasi: "Administrasi",
+      arah: "Arah",
+      belanja: "Belanja",
+      beleefdheid: "Sopan santun",
+      cafe: "Kafe",
+      cuaca: "Cuaca",
+      dasar: "Dasar",
+      kerja: "Kerja",
+      kesehatan: "Kesehatan",
+      kota: "Kota",
+      makanan: "Makanan",
+      ov: "OV",
+      perkenalan: "Perkenalan",
+      rumah: "Rumah",
+      waktu: "Waktu",
+    },
     ratings: {
       again: { label: "Ulang", hint: "Belum ingat" },
       hard: { label: "Sulit", hint: "Ragu" },
@@ -170,6 +259,16 @@ const id: Dictionary = {
       unknown_rating: "Penilaian tidak dikenal.",
       card_not_found: "Kartu tidak ditemukan.",
     },
+    syncPending: "Offline — penilaian akan dikirim saat online",
+    syncDone: "Penilaian tersinkron",
+  },
+  offline: {
+    loading: "Memuat kartu tersimpan…",
+    cachedBanner: "Mode offline — kartu dari cache hari ini",
+    emptyTitle: "Belum ada kartu offline",
+    emptyBody:
+      "Buka Belajar saat online dulu agar kartu hari ini tersimpan di ponsel.",
+    openStudy: "Ke Belajar",
   },
   progress: {
     title: "Kemajuan",
@@ -179,7 +278,10 @@ const id: Dictionary = {
     learning: "Sedang dipelajari",
     mastered: "Sudah menguasai",
     totalCards: "Total kartu (kedua arah)",
+    streak: "Hari beruntun",
+    dailyGoal: "Target harian",
     startSession: "Mulai sesi belajar",
+    deckLegend: "Dek",
   },
   error: {
     title: "Ada yang tidak beres",
@@ -254,11 +356,48 @@ const en: Dictionary = {
     emptyTitle: "No cards due",
     emptyBody:
       "Nice — everything for this direction is scheduled again. Take a break, or practice the vocab again.",
+    emptyTitleTheme: "No {theme} cards due",
+    emptyBodyTheme:
+      "Everything in this theme is scheduled again. Try another theme, or practice again.",
+    emptyNextDue: "Next card {when}.",
+    nextDueHours: "in ~{n} hours",
+    nextDueDays: "in ~{n} days",
+    nextDueSoon: "soon",
     practiceAgain: "Practice again",
     seeProgress: "See progress",
+    clearTheme: "All themes",
     langId: "Indonesian",
     langNl: "Dutch",
     showAnswer: "Show answer",
+    habitDue: "{n} due",
+    habitToday: "{done}/{goal} today",
+    habitStreak: "{n}-day streak",
+    habitGoalMet: "Daily goal met",
+    themeLegend: "Study theme",
+    themeAll: "All",
+    outingLabel: "Today’s outing",
+    deckLegend: "Deck",
+    deckLabels: {
+      "a1-kehidupan-sehari-hari": "A1 · Daily life",
+      "a2-werk-administratie": "A2 · Work & admin",
+    },
+    tags: {
+      administrasi: "Admin",
+      arah: "Directions",
+      belanja: "Shopping",
+      beleefdheid: "Polite phrases",
+      cafe: "Café",
+      cuaca: "Weather",
+      dasar: "Basics",
+      kerja: "Work",
+      kesehatan: "Health",
+      kota: "City",
+      makanan: "Food",
+      ov: "Transit",
+      perkenalan: "Intros",
+      rumah: "Home",
+      waktu: "Time",
+    },
     ratings: {
       again: { label: "Again", hint: "Forgot" },
       hard: { label: "Hard", hint: "Unsure" },
@@ -269,6 +408,16 @@ const en: Dictionary = {
       unknown_rating: "Unknown rating.",
       card_not_found: "Card not found.",
     },
+    syncPending: "Offline — ratings will sync when you’re back online",
+    syncDone: "Ratings synced",
+  },
+  offline: {
+    loading: "Loading saved cards…",
+    cachedBanner: "Offline — using today’s cached cards",
+    emptyTitle: "No offline cards yet",
+    emptyBody:
+      "Open Study while online first so today’s cards are saved on your phone.",
+    openStudy: "Go to Study",
   },
   progress: {
     title: "Progress",
@@ -278,7 +427,10 @@ const en: Dictionary = {
     learning: "Learning",
     mastered: "Mastered",
     totalCards: "Total cards (both directions)",
+    streak: "Day streak",
+    dailyGoal: "Daily goal",
     startSession: "Start a study session",
+    deckLegend: "Deck",
   },
   error: {
     title: "Something went wrong",

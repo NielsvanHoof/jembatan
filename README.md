@@ -50,8 +50,27 @@ Open [http://localhost:3000](http://localhost:3000) (redirects to `/id` or `/en`
 | `/id`, `/en` | Landing |
 | `/id/register`, `/en/register` | Register |
 | `/id/login`, `/en/login` | Log in |
-| `/id/study`, `/en/study` | Study session |
-| `/id/progress`, `/en/progress` | Progress |
+| `/id/study`, `/en/study` | Study session (`?deck=`, `?tag=`, `?direction=`) |
+| `/id/progress`, `/en/progress` | Progress (`?deck=`) |
+| `/id/offline`, `/en/offline` | Offline study fallback (PWA) |
+
+Deck content lives in `content/decks/*.yaml` and is imported with `npm run db:seed`.
+
+## PWA (phone home screen)
+
+Production builds register a service worker (`public/sw.js`) and expose a web manifest for **Add to Home Screen**.
+
+- Opening **Study** while online caches today’s due cards in IndexedDB.
+- Ratings made offline are queued and sync when the network returns.
+- Offline navigations fall back to `/id/offline` (or `/en/offline`).
+
+Test with a production build (service worker is disabled in `next dev`):
+
+```bash
+npm run build && npm start
+```
+
+Then use Chrome DevTools → Application → Service Workers / Manifest, or install from the browser menu on your phone (HTTPS / Vercel).
 
 ## Deploy on Vercel
 

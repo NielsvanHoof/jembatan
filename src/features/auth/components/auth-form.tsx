@@ -6,9 +6,11 @@ import {
   type AuthFormState,
   loginAction,
   registerAction,
-} from "@/app/actions/auth";
+} from "@/features/auth/actions";
 import type { Dictionary, Locale } from "@/lib/i18n/dictionaries";
 import { pathFor } from "@/lib/i18n/paths";
+
+import "../styles.css";
 
 const initial: AuthFormState = {};
 

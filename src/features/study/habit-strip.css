@@ -1,0 +1,16 @@
+/* Habit strip (due / today / streak) — shared by study + progress */
+.habit-strip {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.4rem 0.55rem;
+  margin: 0;
+  padding: 0.55rem 0.75rem;
+  border-radius: 0.75rem;
+  background: color-mix(in oklab, white 70%, var(--mist));
+  border: 1px solid color-mix(in oklab, var(--canal) 12%, transparent);
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--bridge);
+  flex-shrink: 0;
+}

@@ -1,17 +1,117 @@
 /**
- * Seed the A1 daily-life deck (and optional bootstrap user).
+ * Import all YAML decks from content/decks into Postgres.
  * Run: npm run db:seed
  */
+import { readdir, readFile } from "node:fs/promises";
+import path from "node:path";
 import "./load-env";
 import { hash } from "bcryptjs";
 import { eq } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/postgres-js";
 import postgres from "postgres";
-import {
-  A1_DAILY_NL_CARDS,
-  A1_DAILY_NL_DECK,
-} from "../src/data/seed-a1-daily-nl";
+import { parse as parseYaml } from "yaml";
 import { cards, decks, users } from "../src/db/schema";
+
+type DeckCard = {
+  frontId: string;
+  backNl: string;
+  exampleId?: string;
+  exampleNl?: string;
+  tags: string[];
+};
+
+type DeckFile = {
+  slug: string;
+  level: string;
+  titleId: string;
+  titleNl: string;
+  descriptionId: string;
+  cards: DeckCard[];
+};
+
+const DECKS_DIR = path.join(process.cwd(), "content/decks");
+
+async function loadDeckFiles(): Promise<DeckFile[]> {
+  const names = (await readdir(DECKS_DIR))
+    .filter((name) => name.endsWith(".yaml") || name.endsWith(".yml"))
+    .sort();
+
+  const loaded: DeckFile[] = [];
+  for (const name of names) {
+    const raw = await readFile(path.join(DECKS_DIR, name), "utf8");
+    const doc = parseYaml(raw) as DeckFile;
+    if (!doc?.slug || !Array.isArray(doc.cards)) {
+      throw new Error(`Invalid deck file: ${name}`);
+    }
+    loaded.push({
+      slug: doc.slug,
+      level: doc.level || "A1",
+      titleId: doc.titleId,
+      titleNl: doc.titleNl,
+      descriptionId: doc.descriptionId,
+      cards: doc.cards,
+    });
+  }
+  return loaded;
+}
+
+async function upsertDeck(
+  db: ReturnType<typeof drizzle>,
+  deck: DeckFile,
+): Promise<void> {
+  console.log(`Seeding deck "${deck.slug}" (${deck.level})…`);
+
+  const existingDeck = await db
+    .select()
+    .from(decks)
+    .where(eq(decks.slug, deck.slug))
+    .limit(1);
+
+  let deckId: string;
+
+  if (existingDeck[0]) {
+    deckId = existingDeck[0].id;
+    await db
+      .update(decks)
+      .set({
+        level: deck.level,
+        titleId: deck.titleId,
+        titleNl: deck.titleNl,
+        descriptionId: deck.descriptionId,
+      })
+      .where(eq(decks.id, deckId));
+
+    // Replace cards for a clean reseed of content.
+    await db.delete(cards).where(eq(cards.deckId, deckId));
+    console.log("Updated existing deck and cleared old cards.");
+  } else {
+    const [created] = await db
+      .insert(decks)
+      .values({
+        slug: deck.slug,
+        level: deck.level,
+        titleId: deck.titleId,
+        titleNl: deck.titleNl,
+        descriptionId: deck.descriptionId,
+      })
+      .returning();
+    deckId = created.id;
+    console.log("Created new deck.");
+  }
+
+  await db.insert(cards).values(
+    deck.cards.map((card) => ({
+      deckId,
+      frontId: card.frontId,
+      backNl: card.backNl,
+      exampleId: card.exampleId ?? null,
+      exampleNl: card.exampleNl ?? null,
+      tags: card.tags ?? [],
+    })),
+  );
+
+  console.log(`Inserted ${deck.cards.length} cards.`);
+}
 
 async function main() {
   // Prefer Neon direct URL when present (more reliable for bulk inserts).
@@ -23,57 +123,14 @@ async function main() {
   const client = postgres(url, { max: 1 });
   const db = drizzle(client);
 
-  console.log(`Seeding deck "${A1_DAILY_NL_DECK.slug}"…`);
-
-  // Upsert deck by slug so re-running seed is safe for the deck row.
-  const existingDeck = await db
-    .select()
-    .from(decks)
-    .where(eq(decks.slug, A1_DAILY_NL_DECK.slug))
-    .limit(1);
-
-  let deckId: string;
-
-  if (existingDeck[0]) {
-    deckId = existingDeck[0].id;
-    await db
-      .update(decks)
-      .set({
-        titleId: A1_DAILY_NL_DECK.titleId,
-        titleNl: A1_DAILY_NL_DECK.titleNl,
-        descriptionId: A1_DAILY_NL_DECK.descriptionId,
-      })
-      .where(eq(decks.id, deckId));
-
-    // Replace cards for a clean reseed of content.
-    await db.delete(cards).where(eq(cards.deckId, deckId));
-    console.log("Updated existing deck and cleared old cards.");
-  } else {
-    const [created] = await db
-      .insert(decks)
-      .values({
-        slug: A1_DAILY_NL_DECK.slug,
-        titleId: A1_DAILY_NL_DECK.titleId,
-        titleNl: A1_DAILY_NL_DECK.titleNl,
-        descriptionId: A1_DAILY_NL_DECK.descriptionId,
-      })
-      .returning();
-    deckId = created.id;
-    console.log("Created new deck.");
+  const deckFiles = await loadDeckFiles();
+  if (deckFiles.length === 0) {
+    throw new Error(`No YAML decks found in ${DECKS_DIR}`);
   }
 
-  await db.insert(cards).values(
-    A1_DAILY_NL_CARDS.map((card) => ({
-      deckId,
-      frontId: card.frontId,
-      backNl: card.backNl,
-      exampleId: card.exampleId ?? null,
-      exampleNl: card.exampleNl ?? null,
-      tags: card.tags,
-    })),
-  );
-
-  console.log(`Inserted ${A1_DAILY_NL_CARDS.length} cards.`);
+  for (const deck of deckFiles) {
+    await upsertDeck(db, deck);
+  }
 
   // Optional bootstrap learner account from env.
   const seedEmail = process.env.SEED_USER_EMAIL?.toLowerCase().trim();
@@ -103,7 +160,7 @@ async function main() {
   }
 
   await client.end();
-  console.log("Seed complete.");
+  console.log(`Seed complete (${deckFiles.length} decks).`);
 }
 
 main().catch((error) => {

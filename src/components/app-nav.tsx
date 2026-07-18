@@ -1,6 +1,6 @@
 import Link from "next/link";
-import { logoutAction } from "@/app/actions/auth";
 import { LanguageSwitcher } from "@/components/language-switcher";
+import { logoutAction } from "@/features/auth/actions";
 import { auth } from "@/lib/auth";
 import type { Dictionary, Locale } from "@/lib/i18n/dictionaries";
 import { pathFor } from "@/lib/i18n/paths";

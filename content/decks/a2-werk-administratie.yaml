@@ -1,0 +1,218 @@
+slug: a2-werk-administratie
+level: A2
+titleId: Kerja dan administrasi
+titleNl: Werk en administratie
+descriptionId: Kosakata A2 untuk kantor, kontrak, cuti sakit, dan urusan administrasi di Belanda.
+cards:
+  - frontId: Surat kontrak kerja
+    backNl: het arbeidscontract
+    exampleId: Saya menandatangani kontrak kerja.
+    exampleNl: Ik heb het arbeidscontract ondertekend.
+    tags: [kerja, administrasi]
+  - frontId: Kontrak sementara
+    backNl: het tijdelijke contract
+    tags: [kerja, administrasi]
+  - frontId: Kontrak tetap
+    backNl: het vaste contract
+    tags: [kerja]
+  - frontId: Masa percobaan
+    backNl: de proeftijd
+    exampleId: Masa percobaan saya satu bulan.
+    exampleNl: Mijn proeftijd is één maand.
+    tags: [kerja]
+  - frontId: Gaji
+    backNl: het salaris
+    tags: [kerja]
+  - frontId: Slip gaji
+    backNl: de loonstrook
+    tags: [kerja, administrasi]
+  - frontId: Jam kerja
+    backNl: de werktijden
+    exampleId: Jam kerja saya dari sembilan sampai lima.
+    exampleNl: Mijn werktijden zijn van negen tot vijf.
+    tags: [kerja]
+  - frontId: Lembur
+    backNl: overwerken
+    tags: [kerja]
+  - frontId: Cuti
+    backNl: vakantie / verlof
+    exampleId: Saya ingin ambil cuti minggu depan.
+    exampleNl: Ik wil volgende week verlof opnemen.
+    tags: [kerja]
+  - frontId: Cuti sakit
+    backNl: ziekteverlof
+    exampleId: Saya sakit, jadi cuti sakit hari ini.
+    exampleNl: Ik ben ziek, dus vandaag ziekteverlof.
+    tags: [kerja, kesehatan]
+  - frontId: Saya sakit hari ini
+    backNl: Ik ben vandaag ziek
+    tags: [kesehatan, kerja]
+  - frontId: Dokter perusahaan
+    backNl: de bedrijfsarts
+    tags: [kesehatan, kerja]
+  - frontId: Rapat
+    backNl: de vergadering
+    exampleId: Kita punya rapat pukul sepuluh.
+    exampleNl: We hebben om tien uur een vergadering.
+    tags: [kerja]
+  - frontId: Agenda rapat
+    backNl: de agenda
+    tags: [kerja]
+  - frontId: Notulen
+    backNl: de notulen
+    tags: [kerja, administrasi]
+  - frontId: Kolega
+    backNl: de collega
+    tags: [kerja, beleefdheid]
+  - frontId: Atasan
+    backNl: de leidinggevende / de baas
+    tags: [kerja]
+  - frontId: Tim
+    backNl: het team
+    tags: [kerja]
+  - frontId: Kantor
+    backNl: het kantoor
+    tags: [kerja]
+  - frontId: Bekerja dari rumah
+    backNl: thuiswerken
+    exampleId: Hari ini saya bekerja dari rumah.
+    exampleNl: Vandaag werk ik thuis.
+    tags: [kerja]
+  - frontId: Email kerja
+    backNl: de zakelijke e-mail
+    tags: [kerja, administrasi]
+  - frontId: Lampiran
+    backNl: de bijlage
+    exampleId: Saya kirim lampiran di email.
+    exampleNl: Ik stuur de bijlage in de e-mail.
+    tags: [administrasi]
+  - frontId: Tenggat waktu
+    backNl: de deadline
+    tags: [kerja]
+  - frontId: Tugas
+    backNl: de taak
+    tags: [kerja]
+  - frontId: Proyek
+    backNl: het project
+    tags: [kerja]
+  - frontId: Boleh saya bertanya?
+    backNl: Mag ik iets vragen?
+    tags: [beleefdheid, kerja]
+  - frontId: Bisakah kita jadwalkan ulang?
+    backNl: Kunnen we het verzetten?
+    tags: [beleefdheid, kerja]
+  - frontId: Saya tidak bisa datang
+    backNl: Ik kan er niet bij zijn
+    tags: [beleefdheid, kerja]
+  - frontId: Terima kasih atas emailnya
+    backNl: Bedankt voor je e-mail
+    tags: [beleefdheid]
+  - frontId: Dengan hormat
+    backNl: Geachte heer/mevrouw
+    tags: [beleefdheid, administrasi]
+  - frontId: Hormat saya
+    backNl: Met vriendelijke groet
+    tags: [beleefdheid, administrasi]
+  - frontId: DigiD
+    backNl: DigiD
+    exampleId: Saya login dengan DigiD.
+    exampleNl: Ik log in met DigiD.
+    tags: [administrasi]
+  - frontId: Nomor BSN
+    backNl: het BSN-nummer
+    tags: [administrasi]
+  - frontId: Formulier
+    backNl: het formulier
+    exampleId: Tolong isi formulir ini.
+    exampleNl: Vul dit formulier in, alstublieft.
+    tags: [administrasi]
+  - frontId: Janji temu
+    backNl: de afspraak
+    exampleId: Saya punya janji temu di balai kota.
+    exampleNl: Ik heb een afspraak op het gemeentehuis.
+    tags: [administrasi]
+  - frontId: Balai kota
+    backNl: het gemeentehuis
+    tags: [administrasi]
+  - frontId: Izin tinggal
+    backNl: de verblijfsvergunning
+    tags: [administrasi]
+  - frontId: Asuransi kesehatan
+    backNl: de zorgverzekering
+    tags: [administrasi, kesehatan]
+  - frontId: Pajak
+    backNl: de belasting
+    tags: [administrasi]
+  - frontId: Kantor pajak
+    backNl: de Belastingdienst
+    tags: [administrasi]
+  - frontId: Surat dari pemerintah
+    backNl: de overheidsbrief
+    tags: [administrasi]
+  - frontId: Pengingat pembayaran
+    backNl: de aanmaning
+    tags: [administrasi]
+  - frontId: Nomor rekening bank
+    backNl: het rekeningnummer (IBAN)
+    tags: [administrasi]
+  - frontId: Transfer gaji
+    backNl: de salarisbetaling
+    tags: [kerja, administrasi]
+  - frontId: Serikat pekerja
+    backNl: de vakbond
+    tags: [kerja]
+  - frontId: Hak cuti tahunan
+    backNl: de vakantiedagen
+    exampleId: Saya masih punya sepuluh hari cuti.
+    exampleNl: Ik heb nog tien vakantiedagen.
+    tags: [kerja]
+  - frontId: Penilaian kinerja
+    backNl: het functioneringsgesprek
+    tags: [kerja]
+  - frontId: Pelatihan
+    backNl: de training / de cursus
+    tags: [kerja]
+  - frontId: Lowongan kerja
+    backNl: de vacature
+    tags: [kerja]
+  - frontId: Surat lamaran
+    backNl: de sollicitatiebrief
+    tags: [kerja, administrasi]
+  - frontId: Curriculum vitae
+    backNl: het cv
+    tags: [kerja, administrasi]
+  - frontId: Wawancara kerja
+    backNl: het sollicitatiegesprek
+    tags: [kerja]
+  - frontId: Referensi
+    backNl: de referenties
+    tags: [kerja]
+  - frontId: Mulai kerja
+    backNl: in dienst treden
+    exampleId: Saya mulai kerja bulan depan.
+    exampleNl: Ik treed volgende maand in dienst.
+    tags: [kerja]
+  - frontId: Berhenti kerja
+    backNl: ontslag nemen / uit dienst gaan
+    tags: [kerja]
+  - frontId: Surat pengunduran diri
+    backNl: de ontslagbrief
+    tags: [kerja, administrasi]
+  - frontId: Periode pemberitahuan
+    backNl: de opzegtermijn
+    tags: [kerja, administrasi]
+  - frontId: Shift malam
+    backNl: de nachtdienst
+    tags: [kerja]
+  - frontId: Istirahat makan siang
+    backNl: de lunchpauze
+    tags: [kerja]
+  - frontId: Ruang rapat
+    backNl: de vergaderruimte
+    tags: [kerja]
+  - frontId: Printer
+    backNl: de printer
+    tags: [kerja]
+  - frontId: Kata sandi kerja
+    backNl: het werkaccount / het wachtwoord
+    tags: [kerja, administrasi]

@@ -1,0 +1,1 @@
+ALTER TABLE "decks" ADD COLUMN "level" text DEFAULT 'A1' NOT NULL;

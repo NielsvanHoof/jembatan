@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { Figtree, Instrument_Serif } from "next/font/google";
 import { notFound } from "next/navigation";
+import { PwaRegister } from "@/components/pwa-register";
 import {
   getDictionary,
   isLocale,
@@ -50,6 +51,19 @@ export async function generateMetadata({
   return {
     title: dict.meta.title,
     description: dict.meta.description,
+    applicationName: "Jembatan",
+    appleWebApp: {
+      capable: true,
+      statusBarStyle: "default",
+      title: "Jembatan",
+    },
+    icons: {
+      apple: "/icons/apple-touch-icon.png",
+      icon: [
+        { url: "/icons/icon-192.png", sizes: "192x192", type: "image/png" },
+        { url: "/icons/icon-512.png", sizes: "512x512", type: "image/png" },
+      ],
+    },
   };
 }
 
@@ -69,7 +83,10 @@ export default async function LangLayout({
       lang={locale}
       className={`${instrument.variable} ${figtree.variable} h-full`}
     >
-      <body className="min-h-full antialiased">{children}</body>
+      <body className="min-h-full antialiased">
+        {children}
+        <PwaRegister locale={locale} />
+      </body>
     </html>
   );
 }

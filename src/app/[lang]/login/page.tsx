@@ -1,6 +1,6 @@
 import { notFound } from "next/navigation";
 import { AppNav } from "@/components/app-nav";
-import { AuthForm } from "@/components/auth-form";
+import { AuthForm } from "@/features/auth/components/auth-form";
 import { getDictionary, isLocale } from "@/lib/i18n/dictionaries";
 
 type LoginPageProps = {

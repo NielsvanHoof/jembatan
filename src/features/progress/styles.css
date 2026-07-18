@@ -1,0 +1,93 @@
+@import "../study/habit-strip.css";
+
+/* —— Progress —— */
+.deck-toggle--page {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  margin: 0 0 1.25rem;
+  padding: 0;
+  border: none;
+}
+
+.deck-toggle--page .deck-toggle__btn {
+  flex: 1 1 auto;
+  border: 1px solid color-mix(in oklab, var(--canal) 22%, transparent);
+  background: color-mix(in oklab, white 70%, var(--mist));
+  color: var(--bridge);
+  font: inherit;
+  font-size: 0.78rem;
+  font-weight: 700;
+  min-height: 2.35rem;
+  padding: 0.35rem 0.7rem;
+  border-radius: 0.65rem;
+  text-align: center;
+  text-decoration: none;
+}
+
+.deck-toggle--page .deck-toggle__btn.is-active {
+  background: var(--canal);
+  border-color: var(--canal);
+  color: #f7fbfd;
+}
+
+.habit-strip--page {
+  margin: 0 0 1.25rem;
+  font-size: 0.9rem;
+}
+
+.progress-page h1 {
+  font-family: var(--font-display), Georgia, serif;
+  font-size: clamp(2rem, 6vw, 2.6rem);
+  font-weight: 400;
+  margin: 0 0 0.4rem;
+  color: var(--canal);
+}
+
+.progress-page .lede {
+  margin: 0 0 1.75rem;
+  color: color-mix(in oklab, var(--ink) 75%, transparent);
+}
+
+.stat-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 0.85rem;
+}
+
+.stat-list li {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 1rem;
+  padding: 0.95rem 0;
+  border-bottom: 1px solid color-mix(in oklab, var(--canal) 16%, transparent);
+}
+
+.stat-list__label {
+  font-weight: 600;
+  color: var(--ink);
+}
+
+.stat-list__value {
+  font-family: var(--font-display), Georgia, serif;
+  font-size: 1.7rem;
+  color: var(--canal);
+}
+
+.progress-cta {
+  margin-top: 1.75rem;
+}
+
+/* Full-width CTA on phone */
+.progress-cta .btn {
+  width: 100%;
+}
+
+@media (min-width: 480px) {
+  .progress-cta .btn {
+    width: auto;
+  }
+}

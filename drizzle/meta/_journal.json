@@ -8,6 +8,13 @@
       "when": 1784368577924,
       "tag": "0000_faithful_eternals",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1784385786932,
+      "tag": "0001_glamorous_ravenous",
+      "breakpoints": true
     }
   ]
 }

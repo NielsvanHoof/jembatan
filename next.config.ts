@@ -18,6 +18,8 @@ const securityHeaders = [
       "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
       "font-src 'self' https://fonts.gstatic.com data:",
       "img-src 'self' data: blob:",
+      // Service worker for PWA / offline study.
+      "worker-src 'self'",
       // US org hosts use *.ingest.us.sentry.io (not covered by *.ingest.sentry.io).
       "connect-src 'self' https://*.ingest.sentry.io https://*.ingest.us.sentry.io https://*.ingest.de.sentry.io",
       "frame-ancestors 'none'",
@@ -34,6 +36,17 @@ const nextConfig: NextConfig = {
       {
         source: "/:path*",
         headers: securityHeaders,
+      },
+      // Keep the service worker fresh so updates install promptly.
+      {
+        source: "/sw.js",
+        headers: [
+          {
+            key: "Cache-Control",
+            value: "public, max-age=0, must-revalidate",
+          },
+          { key: "Service-Worker-Allowed", value: "/" },
+        ],
       },
     ];
   },
