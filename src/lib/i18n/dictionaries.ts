@@ -9,7 +9,18 @@ export type Locale = (typeof locales)[number];
 export const DEFAULT_LOCALE: Locale = "id";
 
 export type Dictionary = {
-  meta: { title: string; description: string };
+  meta: {
+    title: string;
+    description: string;
+    /** Short titles for the title template (`%s · Jembatan`). */
+    pages: {
+      login: string;
+      register: string;
+      study: string;
+      progress: string;
+      offline: string;
+    };
+  };
   nav: {
     study: string;
     progress: string;
@@ -147,6 +158,13 @@ const id: Dictionary = {
     title: "Jembatan — Belajar Belanda dari Indonesia",
     description:
       "Kartu flash Indonesia ↔ Belanda A1–A2 untuk kehidupan sehari-hari, jalan-jalan, dan kerja di Belanda.",
+    pages: {
+      login: "Masuk",
+      register: "Buat akun",
+      study: "Belajar",
+      progress: "Kemajuan",
+      offline: "Offline",
+    },
   },
   nav: {
     study: "Belajar",
@@ -296,6 +314,13 @@ const en: Dictionary = {
     title: "Jembatan — Learn Dutch from Indonesian",
     description:
       "Indonesian ↔ Dutch A1–A2 flashcards for daily life, outings, and work in the Netherlands.",
+    pages: {
+      login: "Log in",
+      register: "Create account",
+      study: "Study",
+      progress: "Progress",
+      offline: "Offline",
+    },
   },
   nav: {
     study: "Study",

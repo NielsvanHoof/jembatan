@@ -1,11 +1,29 @@
+import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { AppNav } from "@/components/app-nav";
 import { AuthForm } from "@/features/auth/components/auth-form";
 import { getDictionary, isLocale } from "@/lib/i18n/dictionaries";
+import { buildPageMetadata } from "@/lib/seo";
 
 type LoginPageProps = {
   params: Promise<{ lang: string }>;
 };
+
+export async function generateMetadata({
+  params,
+}: LoginPageProps): Promise<Metadata> {
+  const { lang } = await params;
+  if (!isLocale(lang)) {
+    return {};
+  }
+  const dict = getDictionary(lang);
+  return buildPageMetadata({
+    locale: lang,
+    path: "/login",
+    title: dict.meta.pages.login,
+    description: dict.login.lede,
+  });
+}
 
 export default async function LoginPage({ params }: LoginPageProps) {
   const { lang } = await params;

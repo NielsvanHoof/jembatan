@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { AppNav } from "@/components/app-nav";
 import {
@@ -13,6 +14,7 @@ import {
 } from "@/features/study/lib/decks";
 import { parseTag } from "@/features/study/lib/themes";
 import { getDictionary, isLocale } from "@/lib/i18n/dictionaries";
+import { buildPageMetadata } from "@/lib/seo";
 
 type StudyPageProps = {
   params: Promise<{ lang: string }>;
@@ -23,6 +25,24 @@ type StudyPageProps = {
     deck?: string;
   }>;
 };
+
+/** Auth-gated — keep out of the index even if a crawler somehow reaches it. */
+export async function generateMetadata({
+  params,
+}: StudyPageProps): Promise<Metadata> {
+  const { lang } = await params;
+  if (!isLocale(lang)) {
+    return {};
+  }
+  const dict = getDictionary(lang);
+  return buildPageMetadata({
+    locale: lang,
+    path: "/study",
+    title: dict.meta.pages.study,
+    description: dict.meta.description,
+    robots: { index: false, follow: false },
+  });
+}
 
 export default async function StudyPage({
   params,

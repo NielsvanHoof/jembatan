@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { AppNav } from "@/components/app-nav";
@@ -14,6 +15,7 @@ import {
   type Locale,
 } from "@/lib/i18n/dictionaries";
 import { pathFor } from "@/lib/i18n/paths";
+import { buildPageMetadata } from "@/lib/seo";
 
 import "@/features/progress/styles.css";
 
@@ -21,6 +23,24 @@ type ProgressPageProps = {
   params: Promise<{ lang: string }>;
   searchParams: Promise<{ deck?: string }>;
 };
+
+/** Auth-gated — keep out of the index. */
+export async function generateMetadata({
+  params,
+}: ProgressPageProps): Promise<Metadata> {
+  const { lang } = await params;
+  if (!isLocale(lang)) {
+    return {};
+  }
+  const dict = getDictionary(lang);
+  return buildPageMetadata({
+    locale: lang,
+    path: "/progress",
+    title: dict.meta.pages.progress,
+    description: dict.progress.lede,
+    robots: { index: false, follow: false },
+  });
+}
 
 function deckLabel(dict: Dictionary["study"], slug: string) {
   return dict.deckLabels[slug as keyof typeof dict.deckLabels] ?? slug;

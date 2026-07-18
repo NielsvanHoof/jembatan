@@ -8,6 +8,8 @@ import {
   type Locale,
   locales,
 } from "@/lib/i18n/dictionaries";
+import { pathFor } from "@/lib/i18n/paths";
+import { localeAlternates, openGraphLocale, SITE_URL } from "@/lib/seo";
 import "../globals.css";
 
 /** Phone-first viewport — safe-area for notched devices. */
@@ -38,6 +40,10 @@ type LangLayoutProps = {
   params: Promise<{ lang: string }>;
 };
 
+/**
+ * Default site-wide metadata. Child pages override title/description via
+ * buildPageMetadata; the title template fills in "%s · Jembatan".
+ */
 export async function generateMetadata({
   params,
 }: {
@@ -48,10 +54,34 @@ export async function generateMetadata({
     return {};
   }
   const dict = getDictionary(lang);
+
   return {
-    title: dict.meta.title,
+    metadataBase: new URL(SITE_URL),
+    // Absolute default so the landing title is not double-templated.
+    title: {
+      default: dict.meta.title,
+      template: "%s · Jembatan",
+    },
     description: dict.meta.description,
     applicationName: "Jembatan",
+    alternates: localeAlternates(lang, "/"),
+    openGraph: {
+      type: "website",
+      siteName: "Jembatan",
+      title: dict.meta.title,
+      description: dict.meta.description,
+      url: pathFor(lang, "/"),
+      locale: openGraphLocale(lang),
+      alternateLocale: locales.filter((l) => l !== lang).map(openGraphLocale),
+      // App icon until a dedicated 1200×630 OG asset exists.
+      images: [{ url: "/icons/icon-512.png", alt: "Jembatan" }],
+    },
+    twitter: {
+      card: "summary",
+      title: dict.meta.title,
+      description: dict.meta.description,
+      images: ["/icons/icon-512.png"],
+    },
     appleWebApp: {
       capable: true,
       statusBarStyle: "default",
