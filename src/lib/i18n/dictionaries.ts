@@ -146,7 +146,7 @@ const id: Dictionary = {
   meta: {
     title: "Jembatan — Belajar Belanda dari Indonesia",
     description:
-      "Kartu kosakata Indonesia ↔ Belanda untuk kehidupan sehari-hari di Belanda.",
+      "Kartu flash Indonesia ↔ Belanda A1–A2 untuk kehidupan sehari-hari, jalan-jalan, dan kerja di Belanda.",
   },
   nav: {
     study: "Belajar",
@@ -162,7 +162,7 @@ const id: Dictionary = {
   },
   landing: {
     headline: "Belajar Belanda langsung dari Indonesia.",
-    lede: "Kosakata A1 untuk belanja, OV, rumah, dan percakapan sehari-hari — tanpa lewat bahasa Inggris.",
+    lede: "Kartu flash A1–A2 untuk kehidupan sehari-hari, jalan-jalan, dan kerja & administrasi — latihan berulang tanpa lewat bahasa Inggris.",
     start: "Mulai belajar",
     continue: "Lanjut belajar",
     hasAccount: "Sudah punya akun",
@@ -295,7 +295,7 @@ const en: Dictionary = {
   meta: {
     title: "Jembatan — Learn Dutch from Indonesian",
     description:
-      "Indonesian ↔ Dutch flashcards for daily life in the Netherlands.",
+      "Indonesian ↔ Dutch A1–A2 flashcards for daily life, outings, and work in the Netherlands.",
   },
   nav: {
     study: "Study",
@@ -311,7 +311,7 @@ const en: Dictionary = {
   },
   landing: {
     headline: "Learn Dutch straight from Indonesian.",
-    lede: "A1 vocab for shopping, transit, home, and everyday talk — without going through English.",
+    lede: "A1–A2 flashcards for daily life, outings, and work & admin — spaced practice without going through English.",
     start: "Start learning",
     continue: "Continue studying",
     hasAccount: "I already have an account",

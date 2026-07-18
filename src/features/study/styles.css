@@ -7,6 +7,10 @@
   gap: 0.85rem;
   flex: 1;
   min-height: 0;
+}
+
+/* Entrance only on first mount — not when switching theme/direction */
+.study--enter {
   animation: rise-in 650ms cubic-bezier(0.22, 1, 0.36, 1) both;
 }
 
@@ -394,7 +398,7 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .study,
+  .study--enter,
   .flashcard__back {
     animation: none;
   }

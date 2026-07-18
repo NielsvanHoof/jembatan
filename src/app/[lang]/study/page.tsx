@@ -59,7 +59,8 @@ export default async function StudyPage({
       <AppNav locale={lang} dict={dict} active="study" />
       <main className="app-main app-main--study">
         <StudySession
-          key={`${deckSlug}-${direction}-${tag ?? "all"}-${practiceAll ? "all" : "due"}`}
+          // Remount only when the deck changes; theme/direction switch client-side.
+          key={deckSlug}
           initialCards={cards}
           direction={direction}
           practiceAll={practiceAll}

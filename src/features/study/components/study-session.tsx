@@ -4,7 +4,11 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState, useTransition } from "react";
 import type { StudyDirection } from "@/db/schema";
-import { reviewCardAction } from "@/features/study/actions";
+import {
+  getDueCards,
+  getHabitSummary,
+  reviewCardAction,
+} from "@/features/study/actions";
 import type { DeckSummary } from "@/features/study/lib/decks";
 import {
   countPendingReviews,
@@ -92,6 +96,19 @@ function studyHref(
   return `${pathFor(locale, "/study")}?${params.toString()}`;
 }
 
+/** Sync query string without a Next.js navigation (no RSC flash). */
+function replaceStudyUrl(
+  locale: Locale,
+  opts: {
+    deckSlug: string;
+    direction: StudyDirection;
+    practiceAll?: boolean;
+    tag?: string;
+  },
+) {
+  window.history.replaceState(null, "", studyHref(locale, opts));
+}
+
 function applyLocalQueue(
   prev: StudyCard[],
   current: StudyCard,
@@ -107,31 +124,35 @@ function applyLocalQueue(
 /** One-card-at-a-time study loop with flip + SM-2 ratings. */
 export function StudySession({
   initialCards,
-  direction,
-  practiceAll,
+  direction: initialDirection,
+  practiceAll: initialPracticeAll,
   deckSlug,
   decks,
   deckTags,
-  tag,
+  tag: initialTag,
   locale,
   dict,
-  habit,
+  habit: initialHabit,
   fromCache = false,
 }: StudySessionProps) {
   const router = useRouter();
   const [queue, setQueue] = useState(initialCards);
+  const [direction, setDirection] = useState(initialDirection);
+  const [tag, setTag] = useState<string | undefined>(initialTag);
+  const [practiceAll, setPracticeAll] = useState(initialPracticeAll);
+  const [habit, setHabit] = useState(initialHabit);
   const [revealed, setRevealed] = useState(false);
   const [pending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
   // Local count so the habit strip updates as she rates cards this session.
-  const [reviewedToday, setReviewedToday] = useState(habit.reviewedToday);
+  const [reviewedToday, setReviewedToday] = useState(initialHabit.reviewedToday);
   const [pendingSync, setPendingSync] = useState(0);
   const [syncNote, setSyncNote] = useState<string | null>(
     fromCache ? dict.syncPending : null,
   );
-  const [offline, setOffline] = useState(
-    () => typeof navigator !== "undefined" && !navigator.onLine,
-  );
+  const [offline, setOffline] = useState(false);
+  // Play rise-in once on mount; filter switches must not re-animate.
+  const [animateIn, setAnimateIn] = useState(true);
 
   const current = queue[0];
   const remaining = queue.length;
@@ -141,6 +162,11 @@ export function StudySession({
   const { outing, other } = partitionDeckTags(deckTags);
   // Theme / direction / deck switches need the network (except cached resume).
   const filtersLocked = fromCache || offline;
+
+  useEffect(() => {
+    const id = window.setTimeout(() => setAnimateIn(false), 700);
+    return () => window.clearTimeout(id);
+  }, []);
 
   // Cache today’s queue for offline reopen + keep IDB in sync as she studies.
   useEffect(() => {
@@ -155,6 +181,8 @@ export function StudySession({
   }, [queue, deckSlug, direction, tag, practiceAll, habit, reviewedToday]);
 
   useEffect(() => {
+    // Read onLine only after mount — never in the initial render.
+    setOffline(!navigator.onLine);
     void countPendingReviews().then(setPendingSync);
 
     function onOnline() {
@@ -179,32 +207,87 @@ export function StudySession({
     };
   }, [dict.syncDone, dict.syncPending]);
 
-  function navigate(next: {
-    deckSlug?: string;
-    direction?: StudyDirection;
-    practiceAll?: boolean;
-    tag?: string | null;
-  }) {
-    if (filtersLocked) {
+  /** Deck change still does a full navigation (new tags + content). */
+  function switchDeck(nextDeck: string) {
+    if (filtersLocked || nextDeck === deckSlug) {
       return;
     }
-    const nextDeck = next.deckSlug ?? deckSlug;
-    // Switching deck clears the theme filter (tags differ per deck).
-    const nextTag =
-      next.tag === null
-        ? undefined
-        : next.deckSlug && next.deckSlug !== deckSlug
-          ? undefined
-          : (next.tag ?? tag);
-
     router.push(
       studyHref(locale, {
         deckSlug: nextDeck,
-        direction: next.direction ?? direction,
-        practiceAll: next.practiceAll ?? practiceAll,
-        tag: nextTag,
+        direction,
+        practiceAll,
       }),
     );
+  }
+
+  /**
+   * Theme / direction / practice-all: fetch on the client and replaceState.
+   * Avoids RSC remount flash from router.push.
+   */
+  function switchFilters(next: {
+    direction?: StudyDirection;
+    tag?: string | null;
+    practiceAll?: boolean;
+  }) {
+    if (filtersLocked || pending) {
+      return;
+    }
+
+    const nextDirection = next.direction ?? direction;
+    const nextTag =
+      next.tag === null ? undefined : (next.tag ?? tag);
+    const nextPracticeAll = next.practiceAll ?? practiceAll;
+
+    if (
+      nextDirection === direction &&
+      nextTag === tag &&
+      nextPracticeAll === practiceAll
+    ) {
+      return;
+    }
+
+    startTransition(async () => {
+      setError(null);
+      try {
+        const [cards, nextHabit] = await Promise.all([
+          getDueCards(nextDirection, {
+            practiceAll: nextPracticeAll,
+            tag: nextTag,
+            deckSlug,
+          }),
+          getHabitSummary(nextDirection, {
+            tag: nextTag,
+            deckSlug,
+          }),
+        ]);
+
+        setDirection(nextDirection);
+        setTag(nextTag);
+        setPracticeAll(nextPracticeAll);
+        setQueue(cards);
+        setHabit(nextHabit);
+        setReviewedToday(nextHabit.reviewedToday);
+        setRevealed(false);
+
+        replaceStudyUrl(locale, {
+          deckSlug,
+          direction: nextDirection,
+          practiceAll: nextPracticeAll,
+          tag: nextTag,
+        });
+      } catch {
+        // Fall back to a normal navigation if the soft switch fails.
+        router.push(
+          studyHref(locale, {
+            deckSlug,
+            direction: nextDirection,
+            practiceAll: nextPracticeAll,
+            tag: nextTag,
+          }),
+        );
+      }
+    });
   }
 
   function onRate(rating: (typeof RATING_KEYS)[number]) {
@@ -263,7 +346,7 @@ export function StudySession({
   }
 
   return (
-    <div className="study">
+    <div className={animateIn ? "study study--enter" : "study"}>
       {syncNote || pendingSync > 0 ? (
         <p className="offline-banner" role="status">
           {syncNote ?? dict.syncPending}
@@ -291,7 +374,7 @@ export function StudySession({
 
       {/* Deck picker */}
       {decks.length > 1 ? (
-        <fieldset className="deck-toggle" disabled={filtersLocked}>
+        <fieldset className="deck-toggle" disabled={filtersLocked || pending}>
           <legend className="sr-only">{dict.deckLegend}</legend>
           {decks.map((deck) => (
             <button
@@ -302,7 +385,7 @@ export function StudySession({
                   ? "deck-toggle__btn is-active"
                   : "deck-toggle__btn"
               }
-              onClick={() => navigate({ deckSlug: deck.slug })}
+              onClick={() => switchDeck(deck.slug)}
             >
               {deckLabel(dict, deck.slug)}
             </button>
@@ -316,14 +399,17 @@ export function StudySession({
           {outing.length > 0 ? (
             <p className="theme-bar__outing">{dict.outingLabel}</p>
           ) : null}
-          <fieldset className="theme-chips" disabled={filtersLocked}>
+          <fieldset
+            className="theme-chips"
+            disabled={filtersLocked || pending}
+          >
             <legend className="sr-only">{dict.themeLegend}</legend>
             <button
               type="button"
               className={
                 !tag ? "theme-chips__btn is-active" : "theme-chips__btn"
               }
-              onClick={() => navigate({ tag: null })}
+              onClick={() => switchFilters({ tag: null })}
             >
               {dict.themeAll}
             </button>
@@ -336,7 +422,7 @@ export function StudySession({
                     ? "theme-chips__btn theme-chips__btn--outing is-active"
                     : "theme-chips__btn theme-chips__btn--outing"
                 }
-                onClick={() => navigate({ tag: outingTag })}
+                onClick={() => switchFilters({ tag: outingTag })}
               >
                 {tagLabel(dict, outingTag)}
               </button>
@@ -350,7 +436,7 @@ export function StudySession({
                     ? "theme-chips__btn is-active"
                     : "theme-chips__btn"
                 }
-                onClick={() => navigate({ tag: otherTag })}
+                onClick={() => switchFilters({ tag: otherTag })}
               >
                 {tagLabel(dict, otherTag)}
               </button>
@@ -360,7 +446,10 @@ export function StudySession({
       ) : null}
 
       <div className="study__toolbar">
-        <fieldset className="direction-toggle" disabled={filtersLocked}>
+        <fieldset
+          className="direction-toggle"
+          disabled={filtersLocked || pending}
+        >
           <legend className="sr-only">{dict.directionLegend}</legend>
           <button
             type="button"
@@ -369,7 +458,7 @@ export function StudySession({
                 ? "direction-toggle__btn is-active"
                 : "direction-toggle__btn"
             }
-            onClick={() => navigate({ direction: "id_to_nl" })}
+            onClick={() => switchFilters({ direction: "id_to_nl" })}
           >
             ID → NL
           </button>
@@ -380,7 +469,7 @@ export function StudySession({
                 ? "direction-toggle__btn is-active"
                 : "direction-toggle__btn"
             }
-            onClick={() => navigate({ direction: "nl_to_id" })}
+            onClick={() => switchFilters({ direction: "nl_to_id" })}
           >
             NL → ID
           </button>
@@ -407,24 +496,23 @@ export function StudySession({
             <p className="study-empty__goal">{dict.habitGoalMet}</p>
           ) : null}
           <div className="study-empty__actions">
-            <Link
-              href={studyHref(locale, {
-                deckSlug,
-                direction,
-                practiceAll: true,
-                tag,
-              })}
+            <button
+              type="button"
               className="btn btn--primary"
+              disabled={pending || filtersLocked}
+              onClick={() => switchFilters({ practiceAll: true })}
             >
               {dict.practiceAgain}
-            </Link>
+            </button>
             {tag ? (
-              <Link
-                href={studyHref(locale, { deckSlug, direction })}
+              <button
+                type="button"
                 className="btn btn--ghost"
+                disabled={pending}
+                onClick={() => switchFilters({ tag: null })}
               >
                 {dict.clearTheme}
-              </Link>
+              </button>
             ) : (
               <Link
                 href={`${pathFor(locale, "/progress")}?deck=${deckSlug}`}
