@@ -145,7 +145,9 @@ export function StudySession({
   const [pending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
   // Local count so the habit strip updates as she rates cards this session.
-  const [reviewedToday, setReviewedToday] = useState(initialHabit.reviewedToday);
+  const [reviewedToday, setReviewedToday] = useState(
+    initialHabit.reviewedToday,
+  );
   const [pendingSync, setPendingSync] = useState(0);
   const [syncNote, setSyncNote] = useState<string | null>(
     fromCache ? dict.syncPending : null,
@@ -235,8 +237,7 @@ export function StudySession({
     }
 
     const nextDirection = next.direction ?? direction;
-    const nextTag =
-      next.tag === null ? undefined : (next.tag ?? tag);
+    const nextTag = next.tag === null ? undefined : (next.tag ?? tag);
     const nextPracticeAll = next.practiceAll ?? practiceAll;
 
     if (
@@ -399,10 +400,7 @@ export function StudySession({
           {outing.length > 0 ? (
             <p className="theme-bar__outing">{dict.outingLabel}</p>
           ) : null}
-          <fieldset
-            className="theme-chips"
-            disabled={filtersLocked || pending}
-          >
+          <fieldset className="theme-chips" disabled={filtersLocked || pending}>
             <legend className="sr-only">{dict.themeLegend}</legend>
             <button
               type="button"
