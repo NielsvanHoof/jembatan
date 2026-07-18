@@ -79,7 +79,7 @@ Set for **Production** and **Preview**:
 |----------|----------|--------|
 | `DATABASE_URL` | yes | Neon pooled URL |
 | `AUTH_SECRET` | yes | `openssl rand -base64 32` |
-| `AUTH_URL` | yes | e.g. `https://your-app.vercel.app` |
+| `AUTH_URL` | yes | Production alias, e.g. `https://jembatan-nielsvanhoofs-projects.vercel.app` |
 | `SENTRY_DSN` | no | Server/edge errors |
 | `NEXT_PUBLIC_SENTRY_DSN` | no | Browser errors (often same as DSN) |
 | `SENTRY_AUTH_TOKEN` | no | Source maps on build |
