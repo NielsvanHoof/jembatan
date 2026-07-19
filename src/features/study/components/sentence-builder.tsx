@@ -59,7 +59,9 @@ export function SentenceBuilder({
   const correctWords = splitSentenceWords(text);
   // Bank order is fixed for this mount (parent remounts with key=cardId).
   const [bank] = useState(() => shuffleTiles(tilesFromSentence(text)));
-  const [bankById] = useState(() => new Map(bank.map((tile) => [tile.id, tile])));
+  const [bankById] = useState(
+    () => new Map(bank.map((tile) => [tile.id, tile])),
+  );
   const [pickedIds, setPickedIds] = useState<string[]>([]);
   const [status, setStatus] = useState<"building" | "correct" | "wrong">(
     "building",

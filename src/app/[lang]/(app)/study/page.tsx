@@ -1,11 +1,11 @@
 import type { Metadata } from "next";
-import { Suspense } from "react";
 import { notFound } from "next/navigation";
+import { Suspense } from "react";
 import {
   getDueCards,
   getHabitSummary,
   parseDirection,
-} from "@/features/study/actions";
+} from "@/features/study/actions/session";
 import { StudySession } from "@/features/study/components/study-session";
 import {
   getDeckTags,

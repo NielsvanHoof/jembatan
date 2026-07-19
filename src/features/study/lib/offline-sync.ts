@@ -2,7 +2,7 @@
  * Flush queued offline ratings when the network is back.
  */
 
-import { reviewCardAction } from "@/features/study/actions";
+import { reviewCardAction } from "@/features/study/actions/review";
 import {
   listPendingReviews,
   removePendingReview,

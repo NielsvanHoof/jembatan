@@ -12,17 +12,14 @@ import {
   ensureProgressRows,
   presentCard,
 } from "@/features/study/lib/ensure-progress";
-import { reviewSm2 } from "@/features/study/lib/sm2";
+import { pickSessionCards } from "@/features/study/lib/pick-session-cards";
 import { loadStreakDays } from "@/features/study/lib/streak";
 import {
-  toStudyTagOptions,
   type StudyTagOption,
+  toStudyTagOptions,
 } from "@/features/study/lib/study-ui-copy";
 import { parseStage } from "@/features/study/lib/themes";
-import {
-  reviewCardInputSchema,
-  studyDirectionSchema,
-} from "@/features/study/schemas";
+import { studyDirectionSchema } from "@/features/study/schemas";
 import type {
   CardStage,
   HabitSummary,
@@ -34,46 +31,9 @@ import {
   SESSION_CARD_LIMIT,
   startOfStudyDay,
 } from "@/lib/habit";
-import type { Locale, StudyErrorCode } from "@/lib/i18n/dictionaries";
+import type { Locale } from "@/lib/i18n/dictionaries";
 import { getDictionary, isLocale } from "@/lib/i18n/dictionaries";
 import { requireUserId } from "@/lib/session";
-
-/** Internal join shape for due-card selection — not part of the public domain API. */
-type ProgressRow = {
-  progress: typeof cardProgress.$inferSelect;
-  card: typeof cards.$inferSelect;
-};
-
-/**
- * Prefer already-seen due cards, then introduce a limited number of new ones.
- * Keeps early sessions from dumping the whole deck.
- */
-function pickSessionCards(rows: ProgressRow[]): ProgressRow[] {
-  const seen = rows.filter((row) => row.progress.lastReviewedAt != null);
-  const fresh = rows.filter((row) => row.progress.lastReviewedAt == null);
-
-  const picked: ProgressRow[] = [];
-  for (const row of seen) {
-    if (picked.length >= SESSION_CARD_LIMIT) {
-      break;
-    }
-    picked.push(row);
-  }
-
-  let newCount = 0;
-  for (const row of fresh) {
-    if (picked.length >= SESSION_CARD_LIMIT) {
-      break;
-    }
-    if (newCount >= NEW_CARD_LIMIT) {
-      break;
-    }
-    picked.push(row);
-    newCount += 1;
-  }
-
-  return picked;
-}
 
 export async function getDueCards(
   direction: StudyDirection,
@@ -124,56 +84,6 @@ export async function getDueCards(
     : pickSessionCards(rows);
 
   return sessionRows.map((row) => presentCard(row.card, row.progress));
-}
-
-export async function reviewCardAction(input: {
-  progressId: string;
-  rating: string;
-}): Promise<{ ok: true } | { ok: false; error: StudyErrorCode }> {
-  const userId = await requireUserId();
-
-  // Validate at the action boundary; keep SM-2 pure of string parsing.
-  const parsed = reviewCardInputSchema.safeParse(input);
-  if (!parsed.success) {
-    return { ok: false, error: "unknown_rating" };
-  }
-
-  const [row] = await db
-    .select()
-    .from(cardProgress)
-    .where(
-      and(
-        eq(cardProgress.id, parsed.data.progressId),
-        eq(cardProgress.userId, userId),
-      ),
-    )
-    .limit(1);
-
-  if (!row) {
-    return { ok: false, error: "card_not_found" };
-  }
-
-  const next = reviewSm2(
-    {
-      easeFactor: row.easeFactor,
-      intervalDays: row.intervalDays,
-      repetitions: row.repetitions,
-    },
-    parsed.data.rating,
-  );
-
-  await db
-    .update(cardProgress)
-    .set({
-      easeFactor: next.easeFactor,
-      intervalDays: next.intervalDays,
-      repetitions: next.repetitions,
-      dueAt: next.dueAt,
-      lastReviewedAt: new Date(),
-    })
-    .where(eq(cardProgress.id, row.id));
-
-  return { ok: true };
 }
 
 /**
