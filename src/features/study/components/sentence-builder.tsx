@@ -59,6 +59,7 @@ export function SentenceBuilder({
   const correctWords = splitSentenceWords(text);
   // Bank order is fixed for this mount (parent remounts with key=cardId).
   const [bank] = useState(() => shuffleTiles(tilesFromSentence(text)));
+  const [bankById] = useState(() => new Map(bank.map((tile) => [tile.id, tile])));
   const [pickedIds, setPickedIds] = useState<string[]>([]);
   const [status, setStatus] = useState<"building" | "correct" | "wrong">(
     "building",
@@ -72,9 +73,10 @@ export function SentenceBuilder({
   }, [correctWords.length, onCompleteChange]);
 
   const picked = pickedIds
-    .map((id) => bank.find((tile) => tile.id === id))
+    .map((id) => bankById.get(id))
     .filter((tile): tile is Tile => Boolean(tile));
-  const available = bank.filter((tile) => !pickedIds.includes(tile.id));
+  const pickedSet = new Set(pickedIds);
+  const available = bank.filter((tile) => !pickedSet.has(tile.id));
   const locked = status === "correct";
 
   function evaluate(nextIds: string[]) {
@@ -82,9 +84,7 @@ export function SentenceBuilder({
       setStatus("building");
       return;
     }
-    const built = nextIds.map(
-      (id) => bank.find((tile) => tile.id === id)?.word ?? "",
-    );
+    const built = nextIds.map((id) => bankById.get(id)?.word ?? "");
     const ok = built.every((word, index) => word === correctWords[index]);
     if (ok) {
       setStatus("correct");

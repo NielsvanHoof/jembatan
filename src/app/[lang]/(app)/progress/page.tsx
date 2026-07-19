@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import { getProgressStats } from "@/features/progress/actions";
 import { ProgressPanel } from "@/features/progress/components/progress-panel";
 import { listDecks, parseDeckSlug } from "@/features/study/lib/decks";
+import { toStudyDeckOptions } from "@/features/study/lib/study-ui-copy";
 import { getDictionary, isLocale } from "@/lib/i18n/dictionaries";
 import { buildPageMetadata } from "@/lib/seo";
 
@@ -50,8 +51,8 @@ export default async function ProgressPage({
     <main className="app-main progress-page">
       <ProgressPanel
         locale={lang}
-        dict={dict}
-        decks={decks}
+        dict={dict.progress}
+        decks={toStudyDeckOptions(dict.study, decks)}
         initialDeckSlug={deckSlug}
         initialStats={stats}
       />

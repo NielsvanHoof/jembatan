@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { Suspense } from "react";
 import { notFound } from "next/navigation";
 import {
   getDueCards,
@@ -11,6 +12,11 @@ import {
   listDecks,
   parseDeckSlug,
 } from "@/features/study/lib/decks";
+import {
+  toStudyDeckOptions,
+  toStudyTagOptions,
+  toStudyUiCopy,
+} from "@/features/study/lib/study-ui-copy";
 import { parseStage, parseTag } from "@/features/study/lib/themes";
 import { getDictionary, isLocale } from "@/lib/i18n/dictionaries";
 import { buildPageMetadata } from "@/lib/seo";
@@ -44,11 +50,32 @@ export async function generateMetadata({
   });
 }
 
-export default async function StudyPage({
-  params,
+/** Quiet placeholder while due cards + habit stream in. */
+function StudyFallback() {
+  return (
+    <div className="study study--fallback" aria-busy="true">
+      <div className="study-stage">
+        <span className="study-stage__filters">…</span>
+        <p className="study-stage__meta">…</p>
+      </div>
+      <div className="study-board">
+        <article className="flashcard">
+          <p className="flashcard__lang">…</p>
+          <h1 className="flashcard__front">&nbsp;</h1>
+        </article>
+      </div>
+    </div>
+  );
+}
+
+/** Fetches session data — streamed behind Suspense so the shell can paint. */
+async function StudySessionLoader({
+  lang,
   searchParams,
-}: StudyPageProps) {
-  const { lang } = await params;
+}: {
+  lang: string;
+  searchParams: StudyPageProps["searchParams"];
+}) {
   if (!isLocale(lang)) {
     notFound();
   }
@@ -77,21 +104,37 @@ export default async function StudyPage({
   ]);
 
   return (
+    <StudySession
+      // Soft-switch keeps this mounted; no key={deck} remount.
+      initialCards={cards}
+      direction={direction}
+      practiceAll={practiceAll}
+      deckSlug={deckSlug}
+      decks={toStudyDeckOptions(dict.study, decks)}
+      tagOptions={toStudyTagOptions(dict.study, deckTags)}
+      tag={tag}
+      stage={stage}
+      locale={lang}
+      dict={toStudyUiCopy(dict.study)}
+      habit={habit}
+    />
+  );
+}
+
+export default async function StudyPage({
+  params,
+  searchParams,
+}: StudyPageProps) {
+  const { lang } = await params;
+  if (!isLocale(lang)) {
+    notFound();
+  }
+
+  return (
     <main className="app-main app-main--study">
-      <StudySession
-        // Soft-switch keeps this mounted; no key={deck} remount.
-        initialCards={cards}
-        direction={direction}
-        practiceAll={practiceAll}
-        deckSlug={deckSlug}
-        decks={decks}
-        deckTags={deckTags}
-        tag={tag}
-        stage={stage}
-        locale={lang}
-        dict={dict.study}
-        habit={habit}
-      />
+      <Suspense fallback={<StudyFallback />}>
+        <StudySessionLoader lang={lang} searchParams={searchParams} />
+      </Suspense>
     </main>
   );
 }

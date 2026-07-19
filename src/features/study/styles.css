@@ -67,6 +67,17 @@
   cursor: pointer;
   text-align: center;
   text-decoration: none;
+  /* Soft hover feedback on desktop without fighting the active fill. */
+  transition:
+    background 120ms ease,
+    border-color 120ms ease,
+    color 120ms ease;
+}
+
+.deck-toggle__btn:hover:not(:disabled):not(.is-active) {
+  background: color-mix(in oklab, white 45%, var(--mist));
+  border-color: color-mix(in oklab, var(--canal) 38%, transparent);
+  color: var(--canal);
 }
 
 .deck-toggle__btn.is-active {
@@ -127,11 +138,26 @@
   border-radius: 0.65rem;
   cursor: pointer;
   white-space: nowrap;
+  transition:
+    background 120ms ease,
+    border-color 120ms ease,
+    color 120ms ease;
+}
+
+.theme-chips__btn:hover:not(:disabled):not(.is-active) {
+  background: color-mix(in oklab, white 45%, var(--mist));
+  border-color: color-mix(in oklab, var(--canal) 38%, transparent);
+  color: var(--canal);
 }
 
 .theme-chips__btn--outing {
   border-color: color-mix(in oklab, var(--saffron) 45%, transparent);
   color: color-mix(in oklab, var(--saffron-deep) 85%, var(--ink));
+}
+
+.theme-chips__btn--outing:hover:not(:disabled):not(.is-active) {
+  background: color-mix(in oklab, #ffe8bf 55%, white);
+  border-color: color-mix(in oklab, var(--saffron) 55%, transparent);
 }
 
 .theme-chips__btn.is-active {
@@ -174,6 +200,16 @@
   border-radius: 0.65rem;
   cursor: pointer;
   text-align: center;
+  transition:
+    background 120ms ease,
+    border-color 120ms ease,
+    color 120ms ease;
+}
+
+.stage-chips__btn:hover:not(:disabled):not(.is-active) {
+  background: color-mix(in oklab, white 45%, var(--mist));
+  border-color: color-mix(in oklab, var(--bridge) 32%, transparent);
+  color: var(--canal);
 }
 
 .stage-chips__btn.is-active {
@@ -407,6 +443,14 @@
   padding: 0.4rem 0.7rem;
   border-radius: 999px;
   cursor: pointer;
+  transition:
+    background 120ms ease,
+    color 120ms ease;
+}
+
+.direction-toggle__btn:hover:not(:disabled):not(.is-active) {
+  background: color-mix(in oklab, white 35%, var(--mist));
+  color: var(--canal);
 }
 
 .direction-toggle__btn.is-active {
@@ -647,4 +691,10 @@
   .flashcard {
     transition: none;
   }
+}
+
+/* Suspense fallback — keep study chrome shape while data streams */
+.study--fallback .flashcard {
+  opacity: 0.55;
+  min-height: 12rem;
 }

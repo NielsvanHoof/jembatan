@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
 import { getProgressStats } from "@/features/progress/actions";
 import type { ProgressStats } from "@/features/progress/types";
-import type { DeckSummary } from "@/features/study/types";
+import type { StudyDeckOption } from "@/features/study/lib/study-ui-copy";
 import type { Dictionary, Locale } from "@/lib/i18n/dictionaries";
 import { pathFor } from "@/lib/i18n/paths";
 
@@ -13,15 +13,12 @@ import "../styles.css";
 
 type ProgressPanelProps = {
   locale: Locale;
-  dict: Dictionary;
-  decks: DeckSummary[];
+  /** Only the progress strings — not the full dictionary. */
+  dict: Dictionary["progress"];
+  decks: StudyDeckOption[];
   initialDeckSlug: string;
   initialStats: ProgressStats;
 };
-
-function deckLabel(dict: Dictionary["study"], slug: string) {
-  return dict.deckLabels[slug as keyof typeof dict.deckLabels] ?? slug;
-}
 
 /** Pride hero: streak when habit is alive; mastered when streak is still 0. */
 function ProgressHero({
@@ -95,31 +92,33 @@ export function ProgressPanel({
       return;
     }
 
+    // Optimistic chip + URL (same pattern as Study) — stats follow when ready.
+    setDeckSlug(nextDeck);
+    replaceProgressUrl(locale, nextDeck);
+
     startTransition(async () => {
       try {
         const nextStats = await getProgressStats({ deckSlug: nextDeck });
-        setDeckSlug(nextDeck);
         setStats(nextStats);
-        replaceProgressUrl(locale, nextDeck);
       } catch {
         router.push(`${pathFor(locale, "/progress")}?deck=${nextDeck}`);
       }
     });
   }
 
-  const quietStats = buildQuietStats(dict.progress, stats);
+  const quietStats = buildQuietStats(dict, stats);
 
   return (
     <div
       className={pending ? "progress-panel is-pending" : "progress-panel"}
       aria-busy={pending || undefined}
     >
-      <h1>{dict.progress.title}</h1>
-      <p className="lede">{dict.progress.lede}</p>
+      <h1>{dict.title}</h1>
+      <p className="lede">{dict.lede}</p>
 
       {decks.length > 1 ? (
         <fieldset className="deck-toggle deck-toggle--page" disabled={pending}>
-          <legend className="sr-only">{dict.progress.deckLegend}</legend>
+          <legend className="sr-only">{dict.deckLegend}</legend>
           {decks.map((deck) => (
             <button
               key={deck.slug}
@@ -131,7 +130,7 @@ export function ProgressPanel({
               }
               onClick={() => switchDeck(deck.slug)}
             >
-              {deckLabel(dict.study, deck.slug)}
+              {deck.label}
             </button>
           ))}
         </fieldset>
@@ -140,8 +139,8 @@ export function ProgressPanel({
       <ProgressHero
         streakDays={stats.streakDays}
         mastered={stats.mastered}
-        streakCaption={dict.progress.streakHero}
-        masteredCaption={dict.progress.masteredHero}
+        streakCaption={dict.streakHero}
+        masteredCaption={dict.masteredHero}
       />
 
       <ul className="stat-list stat-list--quiet">
@@ -159,7 +158,7 @@ export function ProgressPanel({
           className="btn btn--primary"
           prefetch
         >
-          {dict.progress.startSession}
+          {dict.startSession}
         </Link>
       </div>
     </div>

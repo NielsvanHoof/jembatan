@@ -13,4 +13,6 @@
   font-weight: 600;
   color: var(--bridge);
   flex-shrink: 0;
+  /* Counts stay aligned when due / today tick up mid-session. */
+  font-variant-numeric: tabular-nums;
 }

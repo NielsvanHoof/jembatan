@@ -14,6 +14,10 @@ import {
 } from "@/features/study/lib/ensure-progress";
 import { reviewSm2 } from "@/features/study/lib/sm2";
 import { loadStreakDays } from "@/features/study/lib/streak";
+import {
+  toStudyTagOptions,
+  type StudyTagOption,
+} from "@/features/study/lib/study-ui-copy";
 import { parseStage } from "@/features/study/lib/themes";
 import {
   reviewCardInputSchema,
@@ -30,7 +34,8 @@ import {
   SESSION_CARD_LIMIT,
   startOfStudyDay,
 } from "@/lib/habit";
-import type { StudyErrorCode } from "@/lib/i18n/dictionaries";
+import type { Locale, StudyErrorCode } from "@/lib/i18n/dictionaries";
+import { getDictionary, isLocale } from "@/lib/i18n/dictionaries";
 import { requireUserId } from "@/lib/session";
 
 /** Internal join shape for due-card selection — not part of the public domain API. */
@@ -260,15 +265,19 @@ export async function loadStudySessionAction(options: {
   tag?: string;
   stage?: CardStage;
   practiceAll?: boolean;
+  /** Needed to localize tag chips without shipping the full tags map. */
+  locale: Locale;
 }): Promise<{
   deckSlug: string;
-  deckTags: string[];
+  tagOptions: StudyTagOption[];
   tag?: string;
   stage?: CardStage;
   cards: StudyCard[];
   habit: HabitSummary;
 }> {
   await requireUserId();
+  const locale = isLocale(options.locale) ? options.locale : "id";
+  const studyDict = getDictionary(locale).study;
   const deckSlug = await parseDeckSlug(options.deckSlug);
   const deckTags = await getDeckTags(deckSlug);
 
@@ -288,5 +297,12 @@ export async function loadStudySessionAction(options: {
     getHabitSummary(options.direction, { tag, stage, deckSlug }),
   ]);
 
-  return { deckSlug, deckTags, tag, stage, cards, habit };
+  return {
+    deckSlug,
+    tagOptions: toStudyTagOptions(studyDict, deckTags),
+    tag,
+    stage,
+    cards,
+    habit,
+  };
 }

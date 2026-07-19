@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { StudySession } from "@/features/study/components/study-session";
 import { loadLatestOfflineSession } from "@/features/study/lib/offline-db";
+import { toStudyUiCopy } from "@/features/study/lib/study-ui-copy";
 import type { Dictionary, Locale } from "@/lib/i18n/dictionaries";
 import { pathFor } from "@/lib/i18n/paths";
 
@@ -52,11 +53,11 @@ export function OfflineStudy({ locale, dict }: OfflineStudyProps) {
           practiceAll={session.practiceAll}
           deckSlug={session.deckSlug}
           decks={[]}
-          deckTags={[]}
+          tagOptions={[]}
           tag={session.tag}
           stage={session.stage}
           locale={locale}
-          dict={dict.study}
+          dict={toStudyUiCopy(dict.study)}
           habit={session.habit}
           fromCache
         />

@@ -1,5 +1,6 @@
 "use client";
 
+import dynamic from "next/dynamic";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState, useTransition } from "react";
@@ -8,43 +9,51 @@ import {
   loadStudySessionAction,
   reviewCardAction,
 } from "@/features/study/actions";
-import { SentenceBuilder } from "@/features/study/components/sentence-builder";
-import {
-  countPendingReviews,
-  enqueuePendingReview,
-  saveOfflineSession,
-} from "@/features/study/lib/offline-db";
-import {
-  flushPendingReviews,
-  isNetworkFailure,
-} from "@/features/study/lib/offline-sync";
-import { isOutingTag, partitionDeckTags } from "@/features/study/lib/themes";
 import type {
-  CardStage,
-  DeckSummary,
-  HabitSummary,
-  StudyCard,
-} from "@/features/study/types";
+  StudyDeckOption,
+  StudyTagOption,
+  StudyUiCopy,
+} from "@/features/study/lib/study-ui-copy";
+import { isOutingTag } from "@/features/study/lib/themes";
+import type { CardStage, HabitSummary, StudyCard } from "@/features/study/types";
 import { nextDueLabel } from "@/lib/habit";
-import type { Dictionary, Locale } from "@/lib/i18n/dictionaries";
+import type { Locale } from "@/lib/i18n/dictionaries";
 import { pathFor } from "@/lib/i18n/paths";
 
 import "../styles.css";
+
+// Filters chrome + sentence builder stay out of the initial study chunk.
+const StudyFilters = dynamic(
+  () =>
+    import("@/features/study/components/study-filters").then(
+      (mod) => mod.StudyFilters,
+    ),
+  { ssr: false },
+);
+
+const SentenceBuilder = dynamic(
+  () =>
+    import("@/features/study/components/sentence-builder").then(
+      (mod) => mod.SentenceBuilder,
+    ),
+  { ssr: false },
+);
 
 type StudySessionProps = {
   initialCards: StudyCard[];
   direction: StudyDirection;
   practiceAll: boolean;
   deckSlug: string;
-  decks: DeckSummary[];
-  /** Tags that exist on cards in this deck */
-  deckTags: string[];
+  /** Localized deck chips — no full DeckSummary rows. */
+  decks: StudyDeckOption[];
+  /** Localized theme chips for the active deck only. */
+  tagOptions: StudyTagOption[];
   /** Optional theme filter from `?tag=` */
   tag?: string;
   /** Outing level: words (1) or sentences (2). */
   stage?: CardStage;
   locale: Locale;
-  dict: Dictionary["study"];
+  dict: StudyUiCopy;
   habit: HabitSummary;
   /** True when cards came from IndexedDB (offline resume). */
   fromCache?: boolean;
@@ -52,7 +61,7 @@ type StudySessionProps = {
 
 const RATING_KEYS = ["again", "hard", "good", "easy"] as const;
 
-function formatNextDue(dict: Dictionary["study"], nextDueAt: string | null) {
+function formatNextDue(dict: StudyUiCopy, nextDueAt: string | null) {
   const label = nextDueLabel(nextDueAt ? new Date(nextDueAt) : null);
   if (!label) {
     return null;
@@ -70,14 +79,6 @@ function formatNextDue(dict: Dictionary["study"], nextDueAt: string | null) {
     "{when}",
     dict.nextDueDays.replace("{n}", String(label.days)),
   );
-}
-
-function tagLabel(dict: Dictionary["study"], tag: string) {
-  return dict.tags[tag as keyof typeof dict.tags] ?? tag;
-}
-
-function deckLabel(dict: Dictionary["study"], slug: string) {
-  return dict.deckLabels[slug as keyof typeof dict.deckLabels] ?? slug;
 }
 
 /** Build study URL while preserving deck / direction / practice / theme / stage. */
@@ -156,7 +157,7 @@ export function StudySession({
   practiceAll: initialPracticeAll,
   deckSlug: initialDeckSlug,
   decks,
-  deckTags: initialDeckTags,
+  tagOptions: initialTagOptions,
   tag: initialTag,
   stage: initialStage,
   locale,
@@ -168,7 +169,7 @@ export function StudySession({
   const [queue, setQueue] = useState(initialCards);
   const [direction, setDirection] = useState(initialDirection);
   const [deckSlug, setDeckSlug] = useState(initialDeckSlug);
-  const [deckTags, setDeckTags] = useState(initialDeckTags);
+  const [tagOptions, setTagOptions] = useState(initialTagOptions);
   const [tag, setTag] = useState<string | undefined>(initialTag);
   const [stage, setStage] = useState<CardStage | undefined>(initialStage);
   const [practiceAll, setPracticeAll] = useState(initialPracticeAll);
@@ -196,9 +197,9 @@ export function StudySession({
   const remaining = queue.length;
   const goalMet = reviewedToday >= habit.dailyGoal;
   const nextDueText = formatNextDue(dict, habit.nextDueAt);
-  const themeLabel = tag ? tagLabel(dict, tag) : null;
-  const { outing, other } = partitionDeckTags(deckTags);
-  const showStageFilter = isOutingTag(tag);
+  const themeLabel = tag
+    ? (tagOptions.find((option) => option.tag === tag)?.label ?? tag)
+    : null;
   // Sentence-stage cards use word-by-word reveal instead of a single flip.
   const isSentenceCard = current?.stage === "sentences";
   // Theme / direction / deck switches need the network (except cached resume).
@@ -209,17 +210,19 @@ export function StudySession({
     return () => window.clearTimeout(id);
   }, []);
 
-  // Cache today’s queue for offline reopen + keep IDB in sync as she studies.
+  // Cache today’s queue for offline reopen — IDB helpers load in a separate chunk.
   useEffect(() => {
-    void saveOfflineSession({
-      deckSlug,
-      direction,
-      tag,
-      stage,
-      practiceAll,
-      cards: queue,
-      habit: { ...habit, reviewedToday },
-    });
+    void import("@/features/study/lib/offline-db").then(({ saveOfflineSession }) =>
+      saveOfflineSession({
+        deckSlug,
+        direction,
+        tag,
+        stage,
+        practiceAll,
+        cards: queue,
+        habit: { ...habit, reviewedToday },
+      }),
+    );
   }, [
     queue,
     deckSlug,
@@ -234,16 +237,22 @@ export function StudySession({
   useEffect(() => {
     // Read onLine only after mount — never in the initial render.
     setOffline(!navigator.onLine);
-    void countPendingReviews().then(setPendingSync);
+
+    void import("@/features/study/lib/offline-db").then(
+      ({ countPendingReviews }) => countPendingReviews().then(setPendingSync),
+    );
 
     function onOnline() {
       setOffline(false);
-      void flushPendingReviews().then(({ remaining: left }) => {
-        setPendingSync(left);
-        if (left === 0) {
-          setSyncNote(dict.syncDone);
-        }
-      });
+      void import("@/features/study/lib/offline-sync").then(
+        ({ flushPendingReviews }) =>
+          flushPendingReviews().then(({ remaining: left }) => {
+            setPendingSync(left);
+            if (left === 0) {
+              setSyncNote(dict.syncDone);
+            }
+          }),
+      );
     }
     function onOffline() {
       setOffline(true);
@@ -331,10 +340,11 @@ export function StudySession({
           tag: nextTag,
           stage: nextStage,
           practiceAll: nextPracticeAll,
+          locale,
         });
 
         setDeckSlug(loaded.deckSlug);
-        setDeckTags(loaded.deckTags);
+        setTagOptions(loaded.tagOptions);
         setTag(loaded.tag);
         setStage(loaded.stage);
         setQueue(loaded.cards);
@@ -389,6 +399,9 @@ export function StudySession({
 
       // Offline (or from cache without network): queue for later sync.
       if (!navigator.onLine) {
+        const { enqueuePendingReview } = await import(
+          "@/features/study/lib/offline-db"
+        );
         await enqueuePendingReview({
           progressId: current.progressId,
           rating,
@@ -412,11 +425,17 @@ export function StudySession({
 
         advanceLocal();
       } catch (caught) {
+        const { isNetworkFailure } = await import(
+          "@/features/study/lib/offline-sync"
+        );
         if (!isNetworkFailure(caught)) {
           setError(dict.errors.card_not_found);
           return;
         }
         // Dropped mid-request — keep studying, sync later.
+        const { enqueuePendingReview } = await import(
+          "@/features/study/lib/offline-db"
+        );
         await enqueuePendingReview({
           progressId: current.progressId,
           rating,
@@ -476,164 +495,19 @@ export function StudySession({
       </div>
 
       {filtersOpen ? (
-        <div className="study-filters">
-          <div className="habit-strip" aria-live="polite">
-            <span>{dict.habitDue.replace("{n}", String(habit.dueNow))}</span>
-            <span aria-hidden="true">·</span>
-            <span>
-              {dict.habitToday
-                .replace("{done}", String(reviewedToday))
-                .replace("{goal}", String(habit.dailyGoal))}
-            </span>
-            <span aria-hidden="true">·</span>
-            <span>
-              {habit.streakDays > 0
-                ? dict.habitStreak.replace("{n}", String(habit.streakDays))
-                : goalMet
-                  ? dict.habitGoalMet
-                  : dict.habitStreak.replace("{n}", "0")}
-            </span>
-          </div>
-
-          {/* Deck picker */}
-          {decks.length > 1 ? (
-            <fieldset
-              className="deck-toggle"
-              disabled={filtersLocked || pending}
-            >
-              <legend className="sr-only">{dict.deckLegend}</legend>
-              {decks.map((deck) => (
-                <button
-                  key={deck.slug}
-                  type="button"
-                  className={
-                    deckSlug === deck.slug
-                      ? "deck-toggle__btn is-active"
-                      : "deck-toggle__btn"
-                  }
-                  onClick={() => switchFilters({ deckSlug: deck.slug })}
-                >
-                  {deckLabel(dict, deck.slug)}
-                </button>
-              ))}
-            </fieldset>
-          ) : null}
-
-          {/* Theme filter: outing shortcuts first (if in deck), then the rest */}
-          {deckTags.length > 0 ? (
-            <div className="theme-bar">
-              {outing.length > 0 ? (
-                <p className="theme-bar__outing">{dict.outingLabel}</p>
-              ) : null}
-              <fieldset
-                className="theme-chips"
-                disabled={filtersLocked || pending}
-              >
-                <legend className="sr-only">{dict.themeLegend}</legend>
-                <button
-                  type="button"
-                  className={
-                    !tag ? "theme-chips__btn is-active" : "theme-chips__btn"
-                  }
-                  onClick={() => switchFilters({ tag: null })}
-                >
-                  {dict.themeAll}
-                </button>
-                {outing.map((outingTag) => (
-                  <button
-                    key={outingTag}
-                    type="button"
-                    className={
-                      tag === outingTag
-                        ? "theme-chips__btn theme-chips__btn--outing is-active"
-                        : "theme-chips__btn theme-chips__btn--outing"
-                    }
-                    onClick={() => switchFilters({ tag: outingTag })}
-                  >
-                    {tagLabel(dict, outingTag)}
-                  </button>
-                ))}
-                {other.map((otherTag) => (
-                  <button
-                    key={otherTag}
-                    type="button"
-                    className={
-                      tag === otherTag
-                        ? "theme-chips__btn is-active"
-                        : "theme-chips__btn"
-                    }
-                    onClick={() => switchFilters({ tag: otherTag })}
-                  >
-                    {tagLabel(dict, otherTag)}
-                  </button>
-                ))}
-              </fieldset>
-
-              {/* Outing levels: 1 words → 2 sentences (word-by-word) */}
-              {showStageFilter ? (
-                <fieldset
-                  className="stage-chips"
-                  disabled={filtersLocked || pending}
-                >
-                  <legend className="sr-only">{dict.stageLegend}</legend>
-                  <button
-                    type="button"
-                    className={
-                      stage === "words"
-                        ? "stage-chips__btn is-active"
-                        : "stage-chips__btn"
-                    }
-                    onClick={() => switchFilters({ stage: "words" })}
-                  >
-                    {dict.stageWords}
-                  </button>
-                  <button
-                    type="button"
-                    className={
-                      stage === "sentences"
-                        ? "stage-chips__btn is-active"
-                        : "stage-chips__btn"
-                    }
-                    onClick={() => switchFilters({ stage: "sentences" })}
-                  >
-                    {dict.stageSentences}
-                  </button>
-                </fieldset>
-              ) : null}
-            </div>
-          ) : null}
-
-          <div className="study__toolbar">
-            <fieldset
-              className="direction-toggle"
-              disabled={filtersLocked || pending}
-            >
-              <legend className="sr-only">{dict.directionLegend}</legend>
-              <button
-                type="button"
-                className={
-                  direction === "id_to_nl"
-                    ? "direction-toggle__btn is-active"
-                    : "direction-toggle__btn"
-                }
-                onClick={() => switchFilters({ direction: "id_to_nl" })}
-              >
-                ID → NL
-              </button>
-              <button
-                type="button"
-                className={
-                  direction === "nl_to_id"
-                    ? "direction-toggle__btn is-active"
-                    : "direction-toggle__btn"
-                }
-                onClick={() => switchFilters({ direction: "nl_to_id" })}
-              >
-                NL → ID
-              </button>
-            </fieldset>
-          </div>
-        </div>
+        <StudyFilters
+          dict={dict}
+          decks={decks}
+          tagOptions={tagOptions}
+          deckSlug={deckSlug}
+          direction={direction}
+          tag={tag}
+          stage={stage}
+          habit={habit}
+          reviewedToday={reviewedToday}
+          disabled={filtersLocked || pending}
+          onSwitch={switchFilters}
+        />
       ) : null}
 
       {/* Only the card stage dims while filters load — bar stays put. */}
