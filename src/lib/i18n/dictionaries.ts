@@ -83,6 +83,8 @@ export type Dictionary = {
     hideFilters: string;
     langId: string;
     langNl: string;
+    /** Accessible label for the pre-generated TTS speak control. */
+    listen: string;
     showAnswer: string;
     /** Outing theme levels (words → sentences). */
     stageLegend: string;
@@ -255,6 +257,7 @@ const id: Dictionary = {
     hideFilters: "Sembunyikan filter",
     langId: "Indonesia",
     langNl: "Belanda",
+    listen: "Dengarkan",
     showAnswer: "Tampilkan jawaban",
     stageLegend: "Level tema",
     stageWords: "1 · Kata",
@@ -422,6 +425,7 @@ const en: Dictionary = {
     hideFilters: "Hide filters",
     langId: "Indonesian",
     langNl: "Dutch",
+    listen: "Listen",
     showAnswer: "Show answer",
     stageLegend: "Theme level",
     stageWords: "1 · Words",

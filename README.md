@@ -56,6 +56,22 @@ Open [http://localhost:3000](http://localhost:3000) (redirects to `/id` or `/en`
 
 Deck content lives in `content/decks/*.yaml` and is imported with `npm run db:seed`.
 
+## Card audio (Google Chirp 3 HD)
+
+Study cards can play pre-generated Indonesian / Dutch clips. Audio is **not** synthesized at runtime — generate once locally, commit the MP3s under `public/audio/`, and Vercel serves them as static files.
+
+1. Create/select a GCP project and enable **Cloud Text-to-Speech API**.
+2. Auth for the script (pick one):
+   - Service account JSON: set `GOOGLE_APPLICATION_CREDENTIALS` in `.env.local` to the absolute path, or
+   - Application Default Credentials: `gcloud auth application-default login`
+3. Generate (skips files that already exist):
+
+```bash
+npm run audio:generate
+```
+
+Clips land at `public/audio/{id|nl}/{sha1}.mp3` using the same hash as the study speak button. Re-run after editing deck YAML so new/changed phrases get audio.
+
 ## PWA (phone home screen)
 
 Production builds register a service worker (`public/sw.js`) and expose a web manifest for **Add to Home Screen**.
@@ -128,6 +144,7 @@ Serverless functions run in **Frankfurt (`fra1`)** via [`vercel.json`](vercel.js
 | `npm run db:migrate` | Apply Drizzle migrations |
 | `npm run db:seed` | Seed A1 + A2 decks (+ optional user) |
 | `npm run db:studio` | Drizzle Studio |
+| `npm run audio:generate` | Pre-generate Chirp 3 HD MP3s into `public/audio/` |
 
 ## Security notes
 

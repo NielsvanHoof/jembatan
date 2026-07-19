@@ -506,6 +506,24 @@
   color: var(--saffron-deep);
 }
 
+/* Phrase text + speaker — control sits beside the words */
+.flashcard__phrase {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.65rem;
+}
+
+.flashcard__phrase--answer {
+  align-items: center;
+  margin-top: 0.35rem;
+}
+
+.flashcard__phrase .flashcard__front,
+.flashcard__phrase .flashcard__answer {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
 .flashcard__front {
   margin: 0;
   font-family: var(--font-display), Georgia, serif;
@@ -523,17 +541,80 @@
 }
 
 .flashcard__answer {
-  margin: 0.35rem 0 0;
+  margin: 0;
   font-size: clamp(1.35rem, 4vw, 1.7rem);
   font-weight: 600;
   color: var(--canal);
 }
 
 .flashcard__example {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.15rem 0.25rem;
   margin: 0.85rem 0 0;
   font-size: 0.95rem;
   line-height: 1.45;
   color: color-mix(in oklab, var(--ink) 68%, transparent);
+}
+
+.flashcard__example-line {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+/* TTS speak control — icon + label beside the phrase */
+.speak-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.35rem;
+  flex-shrink: 0;
+  min-height: 2.5rem;
+  margin: 0.15rem 0 0;
+  padding: 0.4rem 0.75rem;
+  border: 2px solid var(--canal);
+  border-radius: 999px;
+  background: #fff;
+  color: var(--canal);
+  font: inherit;
+  font-size: 0.8rem;
+  font-weight: 700;
+  line-height: 1;
+  cursor: pointer;
+  transition:
+    background 120ms ease,
+    color 120ms ease,
+    opacity 120ms ease;
+}
+
+.speak-btn__label {
+  letter-spacing: 0.02em;
+}
+
+.speak-btn:hover:not(:disabled) {
+  background: var(--canal);
+  color: #f7fbfd;
+}
+
+.speak-btn--compact {
+  min-height: 1.85rem;
+  margin: 0;
+  padding: 0.25rem;
+  border-width: 1px;
+}
+
+.speak-btn:disabled {
+  cursor: default;
+}
+
+.speak-btn.is-playing {
+  opacity: 0.7;
+}
+
+.speak-btn.is-missing {
+  opacity: 0.35;
 }
 
 .rating-row {

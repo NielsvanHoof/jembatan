@@ -20,6 +20,9 @@ dist/
 .env.*
 !.env.example
 
+# Google Cloud service-account keys (local TTS generate only)
+gcp-keys/
+
 # logs & debug
 logs/
 *.log

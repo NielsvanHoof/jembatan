@@ -2,6 +2,11 @@
 
 import dynamic from "next/dynamic";
 import type { StudyDirection } from "@/db/schema";
+import { SpeakButton } from "@/features/study/components/speak-button";
+import {
+  answerAudioLocale,
+  promptAudioLocale,
+} from "@/features/study/lib/card-audio-path";
 import type { StudyUiCopy } from "@/features/study/lib/study-ui-copy";
 import type { StudyCard } from "@/features/study/types";
 
@@ -32,6 +37,9 @@ export function StudyFlashcard({
   isSentenceCard,
   onWordsCompleteChange,
 }: StudyFlashcardProps) {
+  const frontLocale = promptAudioLocale(direction);
+  const backLocale = answerAudioLocale(direction);
+
   return (
     <article
       className={`flashcard${revealed || isSentenceCard ? " is-revealed" : ""}`}
@@ -40,14 +48,30 @@ export function StudyFlashcard({
       <p className="flashcard__lang">
         {direction === "id_to_nl" ? dict.langId : dict.langNl}
       </p>
-      <h1 className="flashcard__front">{card.front}</h1>
+
+      {/* Phrase + speak sit together so the control is hard to miss. */}
+      <div className="flashcard__phrase">
+        <h1 className="flashcard__front">{card.front}</h1>
+        <SpeakButton
+          text={card.front}
+          locale={frontLocale}
+          label={dict.listen}
+        />
+      </div>
 
       {/* Sentence level: Duolingo-style build the daily line. */}
       {isSentenceCard ? (
         <div className="flashcard__back">
-          <p className="flashcard__lang">
-            {direction === "id_to_nl" ? dict.langNl : dict.langId}
-          </p>
+          <div className="flashcard__phrase flashcard__phrase--answer">
+            <p className="flashcard__lang">
+              {direction === "id_to_nl" ? dict.langNl : dict.langId}
+            </p>
+            <SpeakButton
+              text={card.back}
+              locale={backLocale}
+              label={dict.listen}
+            />
+          </div>
           <SentenceBuilder
             key={card.cardId}
             text={card.back}
@@ -66,13 +90,36 @@ export function StudyFlashcard({
           <p className="flashcard__lang">
             {direction === "id_to_nl" ? dict.langNl : dict.langId}
           </p>
-          <p className="flashcard__answer">{card.back}</p>
+          <div className="flashcard__phrase flashcard__phrase--answer">
+            <p className="flashcard__answer">{card.back}</p>
+            <SpeakButton
+              text={card.back}
+              locale={backLocale}
+              label={dict.listen}
+            />
+          </div>
           {card.exampleFront && card.exampleBack ? (
-            <p className="flashcard__example">
-              <span>{card.exampleFront}</span>
+            <div className="flashcard__example">
+              <span className="flashcard__example-line">
+                <span>{card.exampleFront}</span>
+                <SpeakButton
+                  text={card.exampleFront}
+                  locale={frontLocale}
+                  label={dict.listen}
+                  compact
+                />
+              </span>
               <span aria-hidden="true"> · </span>
-              <span>{card.exampleBack}</span>
-            </p>
+              <span className="flashcard__example-line">
+                <span>{card.exampleBack}</span>
+                <SpeakButton
+                  text={card.exampleBack}
+                  locale={backLocale}
+                  label={dict.listen}
+                  compact
+                />
+              </span>
+            </div>
           ) : null}
         </div>
       ) : null}
