@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import { AppNav } from "@/components/app-nav";
 import {
   getDueCards,
   getHabitSummary,
@@ -12,7 +11,7 @@ import {
   listDecks,
   parseDeckSlug,
 } from "@/features/study/lib/decks";
-import { parseTag } from "@/features/study/lib/themes";
+import { parseStage, parseTag } from "@/features/study/lib/themes";
 import { getDictionary, isLocale } from "@/lib/i18n/dictionaries";
 import { buildPageMetadata } from "@/lib/seo";
 
@@ -22,6 +21,7 @@ type StudyPageProps = {
     direction?: string;
     practice?: string;
     tag?: string;
+    stage?: string;
     deck?: string;
   }>;
 };
@@ -68,31 +68,30 @@ export default async function StudyPage({
   // Ignore theme filters that aren't in this deck.
   const tag =
     requestedTag && deckTags.includes(requestedTag) ? requestedTag : undefined;
+  // Outing themes default to Level 1 (words); other themes ignore stage.
+  const stage = parseStage(query.stage, tag);
 
   const [cards, habit] = await Promise.all([
-    getDueCards(direction, { practiceAll, tag, deckSlug }),
-    getHabitSummary(direction, { tag, deckSlug }),
+    getDueCards(direction, { practiceAll, tag, stage, deckSlug }),
+    getHabitSummary(direction, { tag, stage, deckSlug }),
   ]);
 
   return (
-    <div className="app-shell app-shell--study">
-      <AppNav locale={lang} dict={dict} active="study" />
-      <main className="app-main app-main--study">
-        <StudySession
-          // Remount only when the deck changes; theme/direction switch client-side.
-          key={deckSlug}
-          initialCards={cards}
-          direction={direction}
-          practiceAll={practiceAll}
-          deckSlug={deckSlug}
-          decks={decks}
-          deckTags={deckTags}
-          tag={tag}
-          locale={lang}
-          dict={dict.study}
-          habit={habit}
-        />
-      </main>
-    </div>
+    <main className="app-main app-main--study">
+      <StudySession
+        // Soft-switch keeps this mounted; no key={deck} remount.
+        initialCards={cards}
+        direction={direction}
+        practiceAll={practiceAll}
+        deckSlug={deckSlug}
+        decks={decks}
+        deckTags={deckTags}
+        tag={tag}
+        stage={stage}
+        locale={lang}
+        dict={dict.study}
+        habit={habit}
+      />
+    </main>
   );
 }

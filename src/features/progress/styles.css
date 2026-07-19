@@ -1,6 +1,15 @@
 @import "../study/habit-strip.css";
 
 /* —— Progress —— */
+.progress-panel {
+  transition: opacity 160ms ease;
+}
+
+.progress-panel.is-pending {
+  opacity: 0.72;
+  pointer-events: none;
+}
+
 .deck-toggle--page {
   display: flex;
   flex-wrap: wrap;
@@ -23,12 +32,18 @@
   border-radius: 0.65rem;
   text-align: center;
   text-decoration: none;
+  cursor: pointer;
 }
 
 .deck-toggle--page .deck-toggle__btn.is-active {
   background: var(--canal);
   border-color: var(--canal);
   color: #f7fbfd;
+}
+
+.deck-toggle--page:disabled .deck-toggle__btn {
+  opacity: 0.55;
+  cursor: not-allowed;
 }
 
 .progress-page h1 {

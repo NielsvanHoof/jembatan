@@ -84,6 +84,15 @@ export type Dictionary = {
     langId: string;
     langNl: string;
     showAnswer: string;
+    /** Outing theme levels (words → sentences). */
+    stageLegend: string;
+    stageWords: string;
+    stageSentences: string;
+    /** Duolingo-style sentence builder on Level 2 cards. */
+    builderHint: string;
+    builderTryAgain: string;
+    builderCorrect: string;
+    builderWrong: string;
     habitDue: string;
     habitToday: string;
     habitStreak: string;
@@ -247,6 +256,13 @@ const id: Dictionary = {
     langId: "Indonesia",
     langNl: "Belanda",
     showAnswer: "Tampilkan jawaban",
+    stageLegend: "Level tema",
+    stageWords: "1 · Kata",
+    stageSentences: "2 · Kalimat",
+    builderHint: "Susun kalimatnya — ketuk kata-katanya",
+    builderTryAgain: "Coba lagi",
+    builderCorrect: "Benar — kalimat harian siap dipakai",
+    builderWrong: "Urutannya belum pas — coba lagi",
     habitDue: "{n} jatuh tempo",
     habitToday: "{done}/{goal} hari ini",
     habitStreak: "{n} hari beruntun",
@@ -407,6 +423,13 @@ const en: Dictionary = {
     langId: "Indonesian",
     langNl: "Dutch",
     showAnswer: "Show answer",
+    stageLegend: "Theme level",
+    stageWords: "1 · Words",
+    stageSentences: "2 · Sentences",
+    builderHint: "Build the sentence — tap the words",
+    builderTryAgain: "Try again",
+    builderCorrect: "Nice — a daily line you can use",
+    builderWrong: "Not quite — try another order",
     habitDue: "{n} due",
     habitToday: "{done}/{goal} today",
     habitStreak: "{n}-day streak",

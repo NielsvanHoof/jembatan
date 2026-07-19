@@ -36,6 +36,12 @@ export const decks = pgTable("decks", {
   descriptionId: text("description_id").notNull(),
 });
 
+/**
+ * Outing theme levels: words first, then daily sentences.
+ * Non-outing cards stay on "words" (stage filter is outing-only in the UI).
+ */
+export const cardStageEnum = pgEnum("card_stage", ["words", "sentences"]);
+
 export const cards = pgTable("cards", {
   id: uuid("id").defaultRandom().primaryKey(),
   deckId: uuid("deck_id")
@@ -49,6 +55,11 @@ export const cards = pgTable("cards", {
   exampleNl: text("example_nl"),
   /** Theme tags like belanja, ov, cafe */
   tags: text("tags").array().notNull().default([]),
+  /**
+   * Level within an outing theme.
+   * words = vocab / short phrases; sentences = daily lines (word-by-word reveal).
+   */
+  stage: cardStageEnum("stage").notNull().default("words"),
 });
 
 export const cardProgress = pgTable(

@@ -5,6 +5,12 @@
 
 import type { StudyDirection } from "@/db/schema";
 
+/**
+ * Level inside an outing theme (OV, Belanja, Café, Arah).
+ * words = vocab first; sentences = daily lines with word-by-word reveal.
+ */
+export type CardStage = "words" | "sentences";
+
 /** One flashcard as shown in a study session. */
 export type StudyCard = {
   progressId: string;
@@ -15,6 +21,8 @@ export type StudyCard = {
   exampleBack?: string | null;
   direction: StudyDirection;
   tags: string[];
+  /** Outing level; sentence cards use word-by-word reveal. */
+  stage: CardStage;
 };
 
 /** Compact habit strip for the study page (dates as ISO for client props). */
@@ -78,12 +86,14 @@ export type StudyTag = KnownStudyTag | (string & {});
 
 /** Cached due-card session for offline study (IndexedDB). */
 export type OfflineSession = {
-  /** Composite key: day|deck|direction|tag|practice */
+  /** Composite key: day|deck|direction|tag|stage|practice */
   key: string;
   dayKey: string;
   deckSlug: string;
   direction: StudyDirection;
   tag?: string;
+  /** Outing level filter when the session was cached. */
+  stage?: CardStage;
   practiceAll: boolean;
   cards: StudyCard[];
   habit: HabitSummary;

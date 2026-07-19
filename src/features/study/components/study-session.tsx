@@ -5,10 +5,10 @@ import { useRouter } from "next/navigation";
 import { useEffect, useState, useTransition } from "react";
 import type { StudyDirection } from "@/db/schema";
 import {
-  getDueCards,
-  getHabitSummary,
+  loadStudySessionAction,
   reviewCardAction,
 } from "@/features/study/actions";
+import { SentenceBuilder } from "@/features/study/components/sentence-builder";
 import {
   countPendingReviews,
   enqueuePendingReview,
@@ -18,8 +18,9 @@ import {
   flushPendingReviews,
   isNetworkFailure,
 } from "@/features/study/lib/offline-sync";
-import { partitionDeckTags } from "@/features/study/lib/themes";
+import { isOutingTag, partitionDeckTags } from "@/features/study/lib/themes";
 import type {
+  CardStage,
   DeckSummary,
   HabitSummary,
   StudyCard,
@@ -40,6 +41,8 @@ type StudySessionProps = {
   deckTags: string[];
   /** Optional theme filter from `?tag=` */
   tag?: string;
+  /** Outing level: words (1) or sentences (2). */
+  stage?: CardStage;
   locale: Locale;
   dict: Dictionary["study"];
   habit: HabitSummary;
@@ -77,7 +80,7 @@ function deckLabel(dict: Dictionary["study"], slug: string) {
   return dict.deckLabels[slug as keyof typeof dict.deckLabels] ?? slug;
 }
 
-/** Build study URL while preserving deck / direction / practice / theme. */
+/** Build study URL while preserving deck / direction / practice / theme / stage. */
 function studyHref(
   locale: Locale,
   opts: {
@@ -85,6 +88,7 @@ function studyHref(
     direction: StudyDirection;
     practiceAll?: boolean;
     tag?: string;
+    stage?: CardStage;
   },
 ) {
   const params = new URLSearchParams();
@@ -95,6 +99,10 @@ function studyHref(
   }
   if (opts.tag) {
     params.set("tag", opts.tag);
+  }
+  // Only outing themes carry a level in the URL.
+  if (opts.tag && opts.stage) {
+    params.set("stage", opts.stage);
   }
   return `${pathFor(locale, "/study")}?${params.toString()}`;
 }
@@ -107,6 +115,7 @@ function replaceStudyUrl(
     direction: StudyDirection;
     practiceAll?: boolean;
     tag?: string;
+    stage?: CardStage;
   },
 ) {
   window.history.replaceState(null, "", studyHref(locale, opts));
@@ -145,10 +154,11 @@ export function StudySession({
   initialCards,
   direction: initialDirection,
   practiceAll: initialPracticeAll,
-  deckSlug,
+  deckSlug: initialDeckSlug,
   decks,
-  deckTags,
+  deckTags: initialDeckTags,
   tag: initialTag,
+  stage: initialStage,
   locale,
   dict,
   habit: initialHabit,
@@ -157,10 +167,15 @@ export function StudySession({
   const router = useRouter();
   const [queue, setQueue] = useState(initialCards);
   const [direction, setDirection] = useState(initialDirection);
+  const [deckSlug, setDeckSlug] = useState(initialDeckSlug);
+  const [deckTags, setDeckTags] = useState(initialDeckTags);
   const [tag, setTag] = useState<string | undefined>(initialTag);
+  const [stage, setStage] = useState<CardStage | undefined>(initialStage);
   const [practiceAll, setPracticeAll] = useState(initialPracticeAll);
   const [habit, setHabit] = useState(initialHabit);
   const [revealed, setRevealed] = useState(false);
+  // Sentence cards: ratings unlock only after the builder succeeds.
+  const [wordsComplete, setWordsComplete] = useState(false);
   const [pending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
   // Local count so the habit strip updates as she rates cards this session.
@@ -183,6 +198,9 @@ export function StudySession({
   const nextDueText = formatNextDue(dict, habit.nextDueAt);
   const themeLabel = tag ? tagLabel(dict, tag) : null;
   const { outing, other } = partitionDeckTags(deckTags);
+  const showStageFilter = isOutingTag(tag);
+  // Sentence-stage cards use word-by-word reveal instead of a single flip.
+  const isSentenceCard = current?.stage === "sentences";
   // Theme / direction / deck switches need the network (except cached resume).
   const filtersLocked = fromCache || offline;
 
@@ -197,11 +215,21 @@ export function StudySession({
       deckSlug,
       direction,
       tag,
+      stage,
       practiceAll,
       cards: queue,
       habit: { ...habit, reviewedToday },
     });
-  }, [queue, deckSlug, direction, tag, practiceAll, habit, reviewedToday]);
+  }, [
+    queue,
+    deckSlug,
+    direction,
+    tag,
+    stage,
+    practiceAll,
+    habit,
+    reviewedToday,
+  ]);
 
   useEffect(() => {
     // Read onLine only after mount — never in the initial render.
@@ -230,84 +258,112 @@ export function StudySession({
     };
   }, [dict.syncDone, dict.syncPending]);
 
-  /** Deck change still does a full navigation (new tags + content). */
-  function switchDeck(nextDeck: string) {
-    if (filtersLocked || nextDeck === deckSlug) {
-      return;
-    }
-    router.push(
-      studyHref(locale, {
-        deckSlug: nextDeck,
-        direction,
-        practiceAll,
-      }),
-    );
-  }
-
   /**
-   * Theme / direction / practice-all: fetch on the client and replaceState.
-   * Avoids RSC remount flash from router.push.
+   * Soft-switch any study filter (deck / theme / stage / direction / practice).
+   * Fetches via server action + replaceState — no RSC remount flash.
    */
   function switchFilters(next: {
+    deckSlug?: string;
     direction?: StudyDirection;
     tag?: string | null;
+    stage?: CardStage | null;
     practiceAll?: boolean;
   }) {
     if (filtersLocked || pending) {
       return;
     }
 
+    const nextDeck = next.deckSlug ?? deckSlug;
     const nextDirection = next.direction ?? direction;
-    const nextTag = next.tag === null ? undefined : (next.tag ?? tag);
+    const deckChanged = nextDeck !== deckSlug;
+    // New deck drops theme; clearing theme uses null; otherwise keep.
+    const nextTag = deckChanged
+      ? undefined
+      : next.tag === null
+        ? undefined
+        : (next.tag ?? tag);
+    // Outing themes keep a level; clearing the theme drops it.
+    // Switching outing theme (or deck) resets to Level 1 (words).
+    let nextStage: CardStage | undefined;
+    if (!isOutingTag(nextTag)) {
+      nextStage = undefined;
+    } else if (next.stage) {
+      nextStage = next.stage;
+    } else if (deckChanged || (next.tag !== undefined && next.tag !== tag)) {
+      nextStage = "words";
+    } else {
+      nextStage = stage ?? "words";
+    }
     const nextPracticeAll = next.practiceAll ?? practiceAll;
 
     if (
+      nextDeck === deckSlug &&
       nextDirection === direction &&
       nextTag === tag &&
+      nextStage === stage &&
       nextPracticeAll === practiceAll
     ) {
       return;
     }
 
+    // Optimistic chip state so the bar feels instant (queue follows when ready).
+    setDeckSlug(nextDeck);
+    setDirection(nextDirection);
+    setTag(nextTag);
+    setStage(nextStage);
+    setPracticeAll(nextPracticeAll);
+    setRevealed(false);
+    setWordsComplete(false);
+    replaceStudyUrl(locale, {
+      deckSlug: nextDeck,
+      direction: nextDirection,
+      practiceAll: nextPracticeAll,
+      tag: nextTag,
+      stage: nextStage,
+    });
+
     startTransition(async () => {
       setError(null);
       try {
-        const [cards, nextHabit] = await Promise.all([
-          getDueCards(nextDirection, {
-            practiceAll: nextPracticeAll,
-            tag: nextTag,
-            deckSlug,
-          }),
-          getHabitSummary(nextDirection, {
-            tag: nextTag,
-            deckSlug,
-          }),
-        ]);
-
-        setDirection(nextDirection);
-        setTag(nextTag);
-        setPracticeAll(nextPracticeAll);
-        setQueue(cards);
-        setHabit(nextHabit);
-        setReviewedToday(nextHabit.reviewedToday);
-        setRevealed(false);
-        // New queue (or empty) — keep chrome tucked so the message leads.
-        setFiltersOpen(false);
-
-        replaceStudyUrl(locale, {
-          deckSlug,
+        const loaded = await loadStudySessionAction({
           direction: nextDirection,
-          practiceAll: nextPracticeAll,
+          deckSlug: nextDeck,
           tag: nextTag,
+          stage: nextStage,
+          practiceAll: nextPracticeAll,
         });
+
+        setDeckSlug(loaded.deckSlug);
+        setDeckTags(loaded.deckTags);
+        setTag(loaded.tag);
+        setStage(loaded.stage);
+        setQueue(loaded.cards);
+        setHabit(loaded.habit);
+        setReviewedToday(loaded.habit.reviewedToday);
+
+        // Align URL if the server dropped an invalid theme for the new deck.
+        if (
+          loaded.tag !== nextTag ||
+          loaded.stage !== nextStage ||
+          loaded.deckSlug !== nextDeck
+        ) {
+          replaceStudyUrl(locale, {
+            deckSlug: loaded.deckSlug,
+            direction: nextDirection,
+            practiceAll: nextPracticeAll,
+            tag: loaded.tag,
+            stage: loaded.stage,
+          });
+        }
       } catch {
         // Fall back to a normal navigation if the soft switch fails.
         router.push(
           studyHref(locale, {
-            deckSlug,
+            deckSlug: nextDeck,
             direction: nextDirection,
             practiceAll: nextPracticeAll,
             tag: nextTag,
+            stage: nextStage,
           }),
         );
       }
@@ -327,6 +383,7 @@ export function StudySession({
         setFiltersOpen(false);
         setReviewedToday((n) => n + 1);
         setRevealed(false);
+        setWordsComplete(false);
         setQueue((prev) => applyLocalQueue(prev, current, rating));
       };
 
@@ -372,7 +429,10 @@ export function StudySession({
   }
 
   return (
-    <div className={animateIn ? "study study--enter" : "study"}>
+    <div
+      className={animateIn ? "study study--enter" : "study"}
+      aria-busy={pending || undefined}
+    >
       {syncNote || pendingSync > 0 ? (
         <p className="offline-banner" role="status">
           {syncNote ?? dict.syncPending}
@@ -394,7 +454,14 @@ export function StudySession({
         >
           {filtersOpen ? dict.hideFilters : dict.showFilters}
           {themeLabel && !filtersOpen ? (
-            <span className="study-stage__tag">{themeLabel}</span>
+            <span className="study-stage__tag">
+              {themeLabel}
+              {stage === "sentences"
+                ? ` · ${dict.stageSentences}`
+                : stage === "words"
+                  ? ` · ${dict.stageWords}`
+                  : null}
+            </span>
           ) : null}
         </button>
         <p className="study-stage__meta">
@@ -444,7 +511,7 @@ export function StudySession({
                       ? "deck-toggle__btn is-active"
                       : "deck-toggle__btn"
                   }
-                  onClick={() => switchDeck(deck.slug)}
+                  onClick={() => switchFilters({ deckSlug: deck.slug })}
                 >
                   {deckLabel(dict, deck.slug)}
                 </button>
@@ -501,6 +568,38 @@ export function StudySession({
                   </button>
                 ))}
               </fieldset>
+
+              {/* Outing levels: 1 words → 2 sentences (word-by-word) */}
+              {showStageFilter ? (
+                <fieldset
+                  className="stage-chips"
+                  disabled={filtersLocked || pending}
+                >
+                  <legend className="sr-only">{dict.stageLegend}</legend>
+                  <button
+                    type="button"
+                    className={
+                      stage === "words"
+                        ? "stage-chips__btn is-active"
+                        : "stage-chips__btn"
+                    }
+                    onClick={() => switchFilters({ stage: "words" })}
+                  >
+                    {dict.stageWords}
+                  </button>
+                  <button
+                    type="button"
+                    className={
+                      stage === "sentences"
+                        ? "stage-chips__btn is-active"
+                        : "stage-chips__btn"
+                    }
+                    onClick={() => switchFilters({ stage: "sentences" })}
+                  >
+                    {dict.stageSentences}
+                  </button>
+                </fieldset>
+              ) : null}
             </div>
           ) : null}
 
@@ -537,114 +636,158 @@ export function StudySession({
         </div>
       ) : null}
 
-      {!current ? (
-        <div className="study-empty">
-          <BridgeMark />
-          <h1>
-            {themeLabel
-              ? dict.emptyTitleTheme.replace("{theme}", themeLabel)
-              : dict.emptyTitle}
-          </h1>
-          <p>{themeLabel ? dict.emptyBodyTheme : dict.emptyBody}</p>
-          {nextDueText && !practiceAll ? (
-            <p className="study-empty__next">{nextDueText}</p>
-          ) : null}
-          {goalMet ? (
-            <p className="study-empty__goal">{dict.habitGoalMet}</p>
-          ) : null}
-          <div className="study-empty__actions">
-            <button
-              type="button"
-              className="btn btn--primary"
-              disabled={pending || filtersLocked}
-              onClick={() => switchFilters({ practiceAll: true })}
-            >
-              {dict.practiceAgain}
-            </button>
-            {tag ? (
-              <button
-                type="button"
-                className="btn btn--ghost"
-                disabled={pending}
-                onClick={() => switchFilters({ tag: null })}
-              >
-                {dict.clearTheme}
-              </button>
-            ) : (
-              <Link
-                href={`${pathFor(locale, "/progress")}?deck=${deckSlug}`}
-                className="btn btn--ghost"
-              >
-                {dict.seeProgress}
-              </Link>
-            )}
-          </div>
-        </div>
-      ) : (
-        <>
-          <article
-            className={`flashcard${revealed ? " is-revealed" : ""}`}
-            aria-live="polite"
-          >
-            <p className="flashcard__lang">
-              {direction === "id_to_nl" ? dict.langId : dict.langNl}
-            </p>
-            <h1 className="flashcard__front">{current.front}</h1>
-
-            {revealed ? (
-              <div className="flashcard__back">
-                <p className="flashcard__lang">
-                  {direction === "id_to_nl" ? dict.langNl : dict.langId}
-                </p>
-                <p className="flashcard__answer">{current.back}</p>
-                {current.exampleFront && current.exampleBack ? (
-                  <p className="flashcard__example">
-                    <span>{current.exampleFront}</span>
-                    <span aria-hidden="true"> · </span>
-                    <span>{current.exampleBack}</span>
-                  </p>
-                ) : null}
-              </div>
+      {/* Only the card stage dims while filters load — bar stays put. */}
+      <div className={pending ? "study-board is-pending" : "study-board"}>
+        {!current ? (
+          <div className="study-empty">
+            <BridgeMark />
+            <h1>
+              {themeLabel
+                ? dict.emptyTitleTheme.replace("{theme}", themeLabel)
+                : dict.emptyTitle}
+            </h1>
+            <p>{themeLabel ? dict.emptyBodyTheme : dict.emptyBody}</p>
+            {nextDueText && !practiceAll ? (
+              <p className="study-empty__next">{nextDueText}</p>
             ) : null}
-          </article>
-
-          {error ? (
-            <p className="form-error" role="alert">
-              {error}
-            </p>
-          ) : null}
-
-          <div className="study__actions">
-            {!revealed ? (
+            {goalMet ? (
+              <p className="study-empty__goal">{dict.habitGoalMet}</p>
+            ) : null}
+            <div className="study-empty__actions">
               <button
                 type="button"
-                className="btn btn--primary btn--wide"
-                onClick={() => setRevealed(true)}
+                className="btn btn--primary"
+                disabled={pending || filtersLocked}
+                onClick={() => switchFilters({ practiceAll: true })}
               >
-                {dict.showAnswer}
+                {dict.practiceAgain}
               </button>
-            ) : (
-              <div className="rating-row">
-                {RATING_KEYS.map((rating) => {
-                  const item = dict.ratings[rating];
-                  return (
-                    <button
-                      key={rating}
-                      type="button"
-                      className={`rating-btn rating-btn--${rating}`}
-                      disabled={pending}
-                      onClick={() => onRate(rating)}
-                    >
-                      <span className="rating-btn__label">{item.label}</span>
-                      <span className="rating-btn__hint">{item.hint}</span>
-                    </button>
-                  );
-                })}
-              </div>
-            )}
+              {tag ? (
+                <button
+                  type="button"
+                  className="btn btn--ghost"
+                  disabled={pending}
+                  onClick={() => switchFilters({ tag: null })}
+                >
+                  {dict.clearTheme}
+                </button>
+              ) : (
+                <Link
+                  href={`${pathFor(locale, "/progress")}?deck=${deckSlug}`}
+                  className="btn btn--ghost"
+                >
+                  {dict.seeProgress}
+                </Link>
+              )}
+            </div>
           </div>
-        </>
-      )}
+        ) : (
+          <>
+            <article
+              className={`flashcard${revealed || isSentenceCard ? " is-revealed" : ""}`}
+              aria-live="polite"
+            >
+              <p className="flashcard__lang">
+                {direction === "id_to_nl" ? dict.langId : dict.langNl}
+              </p>
+              <h1 className="flashcard__front">{current.front}</h1>
+
+              {/* Sentence level: Duolingo-style build the daily line. */}
+              {isSentenceCard ? (
+                <div className="flashcard__back">
+                  <p className="flashcard__lang">
+                    {direction === "id_to_nl" ? dict.langNl : dict.langId}
+                  </p>
+                  <SentenceBuilder
+                    key={current.cardId}
+                    text={current.back}
+                    onCompleteChange={setWordsComplete}
+                    hintLabel={dict.builderHint}
+                    tryAgainLabel={dict.builderTryAgain}
+                    correctLabel={dict.builderCorrect}
+                    wrongLabel={dict.builderWrong}
+                    showAnswerLabel={dict.showAnswer}
+                  />
+                </div>
+              ) : null}
+
+              {revealed && !isSentenceCard ? (
+                <div className="flashcard__back">
+                  <p className="flashcard__lang">
+                    {direction === "id_to_nl" ? dict.langNl : dict.langId}
+                  </p>
+                  <p className="flashcard__answer">{current.back}</p>
+                  {current.exampleFront && current.exampleBack ? (
+                    <p className="flashcard__example">
+                      <span>{current.exampleFront}</span>
+                      <span aria-hidden="true"> · </span>
+                      <span>{current.exampleBack}</span>
+                    </p>
+                  ) : null}
+                </div>
+              ) : null}
+            </article>
+
+            {error ? (
+              <p className="form-error" role="alert">
+                {error}
+              </p>
+            ) : null}
+
+            <div className="study__actions">
+              {isSentenceCard ? (
+                wordsComplete ? (
+                  <div className="rating-row">
+                    {RATING_KEYS.map((rating) => {
+                      const item = dict.ratings[rating];
+                      return (
+                        <button
+                          key={rating}
+                          type="button"
+                          className={`rating-btn rating-btn--${rating}`}
+                          disabled={pending}
+                          onClick={() => onRate(rating)}
+                        >
+                          <span className="rating-btn__label">
+                            {item.label}
+                          </span>
+                          <span className="rating-btn__hint">{item.hint}</span>
+                        </button>
+                      );
+                    })}
+                  </div>
+                ) : null
+              ) : !revealed ? (
+                <button
+                  type="button"
+                  className="btn btn--primary btn--wide"
+                  onClick={() => setRevealed(true)}
+                >
+                  {dict.showAnswer}
+                </button>
+              ) : (
+                <div className="rating-row">
+                  {RATING_KEYS.map((rating) => {
+                    const item = dict.ratings[rating];
+                    return (
+                      <button
+                        key={rating}
+                        type="button"
+                        className={`rating-btn rating-btn--${rating}`}
+                        disabled={pending}
+                        onClick={() => onRate(rating)}
+                      >
+                        <span className="rating-btn__label">{item.label}</span>
+                        <span className="rating-btn__hint">{item.hint}</span>
+                      </button>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+          </>
+        )}
+      </div>
     </div>
   );
 }

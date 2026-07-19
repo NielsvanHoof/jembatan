@@ -54,6 +54,7 @@ export function OfflineStudy({ locale, dict }: OfflineStudyProps) {
           decks={[]}
           deckTags={[]}
           tag={session.tag}
+          stage={session.stage}
           locale={locale}
           dict={dict.study}
           habit={session.habit}

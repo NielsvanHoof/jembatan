@@ -9,6 +9,20 @@
   min-height: 0;
 }
 
+/* Card / empty area only — filter bar stays sharp while the queue loads */
+.study-board {
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+  flex: 1;
+  min-height: 0;
+  transition: opacity 140ms ease;
+}
+
+.study-board.is-pending {
+  opacity: 0.55;
+}
+
 /* Entrance only on first mount — not when switching theme/direction */
 .study--enter {
   animation: rise-in 650ms cubic-bezier(0.22, 1, 0.36, 1) both;
@@ -135,6 +149,154 @@
 .theme-chips:disabled .theme-chips__btn {
   opacity: 0.55;
   cursor: not-allowed;
+}
+
+/* Outing levels: 1 words → 2 sentences */
+.stage-chips {
+  display: flex;
+  gap: 0.4rem;
+  margin: 0.15rem 0 0;
+  min-inline-size: 0;
+  padding: 0;
+  border: none;
+}
+
+.stage-chips__btn {
+  flex: 1 1 auto;
+  border: 1px solid color-mix(in oklab, var(--bridge) 18%, transparent);
+  background: color-mix(in oklab, white 75%, var(--mist));
+  color: var(--bridge);
+  font: inherit;
+  font-size: 0.78rem;
+  font-weight: 700;
+  min-height: 2.25rem;
+  padding: 0.3rem 0.7rem;
+  border-radius: 0.65rem;
+  cursor: pointer;
+  text-align: center;
+}
+
+.stage-chips__btn.is-active {
+  background: var(--bridge);
+  border-color: var(--bridge);
+  color: #f7fbfd;
+}
+
+.stage-chips:disabled .stage-chips__btn {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+/* Sentence practice: Duolingo-style builder */
+.sentence-builder {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  margin-top: 0.35rem;
+}
+
+.sentence-builder__hint {
+  margin: 0;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: color-mix(in oklab, var(--ink) 62%, transparent);
+}
+
+.sentence-builder__slot {
+  min-height: 3.4rem;
+  padding: 0.55rem 0.65rem;
+  border-radius: 0.75rem;
+  border: 1px dashed color-mix(in oklab, var(--canal) 35%, transparent);
+  background: color-mix(in oklab, white 78%, var(--mist));
+}
+
+.sentence-builder__slot.is-correct {
+  border-style: solid;
+  border-color: color-mix(in oklab, var(--canal) 55%, transparent);
+  background: color-mix(in oklab, var(--canal) 10%, white);
+}
+
+.sentence-builder__slot.is-wrong {
+  border-style: solid;
+  border-color: color-mix(in oklab, var(--saffron-deep) 55%, transparent);
+  animation: builder-shake 320ms ease;
+}
+
+.sentence-builder__placeholder {
+  color: color-mix(in oklab, var(--ink) 35%, transparent);
+  font-size: 1.2rem;
+  font-weight: 600;
+}
+
+.sentence-builder__row,
+.sentence-builder__bank {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.sentence-builder__chip {
+  border: 1px solid color-mix(in oklab, var(--bridge) 20%, transparent);
+  background: color-mix(in oklab, white 85%, var(--mist));
+  color: var(--bridge);
+  font: inherit;
+  font-size: 0.95rem;
+  font-weight: 700;
+  min-height: 2.4rem;
+  padding: 0.35rem 0.75rem;
+  border-radius: 0.65rem;
+  cursor: pointer;
+}
+
+.sentence-builder__chip:hover:not(:disabled) {
+  border-color: color-mix(in oklab, var(--canal) 40%, transparent);
+}
+
+.sentence-builder__chip.is-picked {
+  background: color-mix(in oklab, var(--canal) 14%, white);
+  border-color: color-mix(in oklab, var(--canal) 40%, transparent);
+  color: var(--canal);
+}
+
+.sentence-builder__chip:disabled {
+  cursor: default;
+  opacity: 0.95;
+}
+
+.sentence-builder__feedback {
+  margin: 0;
+  font-size: 0.85rem;
+  font-weight: 700;
+}
+
+.sentence-builder__feedback.is-correct {
+  color: var(--canal);
+}
+
+.sentence-builder__feedback.is-wrong {
+  color: var(--saffron-deep);
+}
+
+.sentence-builder__actions {
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+}
+
+@keyframes builder-shake {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  25% {
+    transform: translateX(-4px);
+  }
+  75% {
+    transform: translateX(4px);
+  }
 }
 
 /* Compact bar while a card is on stage — filters stay one tap away */
@@ -476,7 +638,8 @@
 
 @media (prefers-reduced-motion: reduce) {
   .study--enter,
-  .flashcard__back {
+  .flashcard__back,
+  .sentence-builder__slot.is-wrong {
     animation: none;
   }
 

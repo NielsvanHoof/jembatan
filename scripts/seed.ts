@@ -12,13 +12,59 @@ import postgres from "postgres";
 import { parse as parseYaml } from "yaml";
 import { cards, decks, users } from "../src/db/schema";
 
+/** Outing themes get Level 1 (words) then Level 2 (sentences). */
+const OUTING_TAGS = new Set(["ov", "belanja", "cafe", "arah"]);
+
+type CardStage = "words" | "sentences";
+
 type DeckCard = {
   frontId: string;
   backNl: string;
   exampleId?: string;
   exampleNl?: string;
   tags: string[];
+  /** Optional override; otherwise inferred for outing tags. */
+  stage?: CardStage;
 };
+
+/**
+ * Count whitespace-separated tokens (for sentence vs word heuristic).
+ * Slash alternatives ("Bon / struk") use the shorter side so vocab stays Level 1.
+ */
+function tokenCount(text: string): number {
+  const trimmed = text.trim();
+  if (!trimmed) {
+    return 0;
+  }
+  // "Metro / kereta bawah tanah" → min(1, 3) = 1 → still a vocab card.
+  if (trimmed.includes("/")) {
+    return Math.min(...trimmed.split("/").map((part) => tokenCount(part)));
+  }
+  return trimmed.split(/\s+/).filter((part) => part.length > 0).length;
+}
+
+/**
+ * Infer outing level from the card text.
+ * Questions and longer lines become sentences; short vocab stays words.
+ */
+function inferStage(card: DeckCard): CardStage {
+  if (card.stage === "words" || card.stage === "sentences") {
+    return card.stage;
+  }
+  const hasOuting = (card.tags ?? []).some((tag) => OUTING_TAGS.has(tag));
+  if (!hasOuting) {
+    return "words";
+  }
+  const blob = `${card.frontId} ${card.backNl}`;
+  if (/[?!]/.test(blob)) {
+    return "sentences";
+  }
+  // Three or more tokens reads as a daily phrase, not a single word.
+  if (tokenCount(card.backNl) >= 3 || tokenCount(card.frontId) >= 3) {
+    return "sentences";
+  }
+  return "words";
+}
 
 type DeckFile = {
   slug: string;
@@ -107,6 +153,8 @@ async function upsertDeck(
       exampleId: card.exampleId ?? null,
       exampleNl: card.exampleNl ?? null,
       tags: card.tags ?? [],
+      // Outing themes: words first, then daily sentences (word-by-word study).
+      stage: inferStage(card),
     })),
   );
 

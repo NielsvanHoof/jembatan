@@ -298,8 +298,8 @@ a:hover {
   padding-bottom: calc(4.25rem + env(safe-area-inset-bottom));
 }
 
-.app-shell--study {
-  /* Study fills the screen between top bar and tab bar */
+/* Study fills the screen between top bar and tab bar (shared (app) shell). */
+.app-shell:has(.app-main--study) {
   height: 100dvh;
   max-height: 100dvh;
   overflow: hidden;
@@ -342,7 +342,7 @@ a:hover {
     padding-bottom: env(safe-area-inset-bottom);
   }
 
-  .app-shell--study {
+  .app-shell:has(.app-main--study) {
     height: auto;
     max-height: none;
     overflow: visible;

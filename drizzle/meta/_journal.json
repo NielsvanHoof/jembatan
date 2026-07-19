@@ -15,6 +15,13 @@
       "when": 1784385786932,
       "tag": "0001_glamorous_ravenous",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1784454238803,
+      "tag": "0002_card_stage",
+      "breakpoints": true
     }
   ]
 }

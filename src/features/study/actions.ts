@@ -3,18 +3,27 @@
 import { and, arrayContains, asc, eq, gt, lte, sql } from "drizzle-orm";
 import { db } from "@/db";
 import { cardProgress, cards, decks, type StudyDirection } from "@/db/schema";
-import { DEFAULT_DECK_SLUG } from "@/features/study/lib/decks";
+import {
+  DEFAULT_DECK_SLUG,
+  getDeckTags,
+  parseDeckSlug,
+} from "@/features/study/lib/decks";
 import {
   ensureProgressRows,
   presentCard,
 } from "@/features/study/lib/ensure-progress";
 import { reviewSm2 } from "@/features/study/lib/sm2";
 import { loadStreakDays } from "@/features/study/lib/streak";
+import { parseStage } from "@/features/study/lib/themes";
 import {
   reviewCardInputSchema,
   studyDirectionSchema,
 } from "@/features/study/schemas";
-import type { HabitSummary, StudyCard } from "@/features/study/types";
+import type {
+  CardStage,
+  HabitSummary,
+  StudyCard,
+} from "@/features/study/types";
 import {
   DAILY_REVIEW_GOAL,
   NEW_CARD_LIMIT,
@@ -67,6 +76,8 @@ export async function getDueCards(
     practiceAll?: boolean;
     limit?: number;
     tag?: string;
+    /** Outing level: words (1) or sentences (2). */
+    stage?: CardStage;
     deckSlug?: string;
   },
 ): Promise<StudyCard[]> {
@@ -96,6 +107,8 @@ export async function getDueCards(
         options?.practiceAll ? sql`true` : lte(cardProgress.dueAt, now),
         // Theme filter: card tags array must contain the selected tag.
         options?.tag ? arrayContains(cards.tags, [options.tag]) : undefined,
+        // Outing level filter (words → sentences).
+        options?.stage ? eq(cards.stage, options.stage) : undefined,
       ),
     )
     .orderBy(asc(cardProgress.dueAt))
@@ -164,7 +177,7 @@ export async function reviewCardAction(input: {
  */
 export async function getHabitSummary(
   direction: StudyDirection,
-  options?: { tag?: string; deckSlug?: string },
+  options?: { tag?: string; stage?: CardStage; deckSlug?: string },
 ): Promise<HabitSummary> {
   const userId = await requireUserId();
   const deckSlug = options?.deckSlug ?? DEFAULT_DECK_SLUG;
@@ -173,6 +186,7 @@ export async function getHabitSummary(
   const now = new Date();
   const dayStartIso = startOfStudyDay(now).toISOString();
   const tag = options?.tag;
+  const stage = options?.stage;
 
   const [dueRow] = await db
     .select({ dueNow: sql<number>`count(*)::int` })
@@ -186,6 +200,7 @@ export async function getHabitSummary(
         eq(decks.slug, deckSlug),
         lte(cardProgress.dueAt, now),
         tag ? arrayContains(cards.tags, [tag]) : undefined,
+        stage ? eq(cards.stage, stage) : undefined,
       ),
     );
 
@@ -211,6 +226,7 @@ export async function getHabitSummary(
         eq(decks.slug, deckSlug),
         gt(cardProgress.dueAt, now),
         tag ? arrayContains(cards.tags, [tag]) : undefined,
+        stage ? eq(cards.stage, stage) : undefined,
       ),
     )
     .orderBy(asc(cardProgress.dueAt))
@@ -232,4 +248,45 @@ export async function parseDirection(
 ): Promise<StudyDirection> {
   const parsed = studyDirectionSchema.safeParse(value);
   return parsed.success ? parsed.data : "id_to_nl";
+}
+
+/**
+ * Soft-switch bundle for Study filters (including deck).
+ * One round-trip: resolve deck → tags → due queue → habit.
+ */
+export async function loadStudySessionAction(options: {
+  direction: StudyDirection;
+  deckSlug?: string;
+  tag?: string;
+  stage?: CardStage;
+  practiceAll?: boolean;
+}): Promise<{
+  deckSlug: string;
+  deckTags: string[];
+  tag?: string;
+  stage?: CardStage;
+  cards: StudyCard[];
+  habit: HabitSummary;
+}> {
+  await requireUserId();
+  const deckSlug = await parseDeckSlug(options.deckSlug);
+  const deckTags = await getDeckTags(deckSlug);
+
+  // Drop theme/stage filters that don't apply to the new deck.
+  const tag =
+    options.tag && deckTags.includes(options.tag) ? options.tag : undefined;
+  // Outing themes default to words; non-outing clears stage.
+  const stage = parseStage(options.stage, tag);
+
+  const [cards, habit] = await Promise.all([
+    getDueCards(options.direction, {
+      practiceAll: options.practiceAll,
+      tag,
+      stage,
+      deckSlug,
+    }),
+    getHabitSummary(options.direction, { tag, stage, deckSlug }),
+  ]);
+
+  return { deckSlug, deckTags, tag, stage, cards, habit };
 }

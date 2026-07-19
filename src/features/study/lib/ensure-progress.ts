@@ -88,5 +88,7 @@ export function presentCard(
     exampleBack: idToNl ? card.exampleNl : card.exampleId,
     direction: progress.direction,
     tags: card.tags ?? [],
+    // Sentence stage triggers word-by-word reveal in the study UI.
+    stage: card.stage ?? "words",
   };
 }

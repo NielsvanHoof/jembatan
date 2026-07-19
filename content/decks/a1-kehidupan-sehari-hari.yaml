@@ -195,7 +195,7 @@ cards:
     tags:
       - ov
   - frontId: Di mana peron nomor…?
-    backNl: Waar is spoor…?
+    backNl: Waar is het spoor…?
     tags:
       - ov
   - frontId: Terlambat
@@ -810,3 +810,101 @@ cards:
     backNl: Mijn telefoonnummer is…
     tags:
       - perkenalan
+
+  # --- Outing Level 2: extra daily sentences (word-by-word practice) ---
+  # Existing phrase cards are staged by the seed heuristic; these fill gaps.
+  - frontId: Di mana stasiunnya?
+    backNl: Waar is het station?
+    stage: sentences
+    tags:
+      - ov
+  - frontId: Saya mau ke Amsterdam.
+    backNl: Ik wil naar Amsterdam.
+    stage: sentences
+    tags:
+      - ov
+  - frontId: Harus check-in dulu.
+    backNl: Je moet eerst inchecken.
+    stage: sentences
+    tags:
+      - ov
+  - frontId: Keretanya terlambat.
+    backNl: De trein is vertraagd.
+    stage: sentences
+    tags:
+      - ov
+  - frontId: Saya harus transfer di Utrecht.
+    backNl: Ik moet in Utrecht overstappen.
+    stage: sentences
+    tags:
+      - ov
+  - frontId: Tiketnya berapa?
+    backNl: Hoeveel kost een kaartje?
+    stage: sentences
+    tags:
+      - ov
+  - frontId: Apakah bisa bayar dengan kartu?
+    backNl: Kan ik pinnen?
+    stage: sentences
+    tags:
+      - belanja
+  - frontId: Saya butuh kantong belanja.
+    backNl: Ik heb een tas nodig.
+    stage: sentences
+    tags:
+      - belanja
+  - frontId: Ada antre panjang.
+    backNl: Er is een lange rij.
+    stage: sentences
+    tags:
+      - belanja
+  - frontId: Itu terlalu mahal.
+    backNl: Dat is te duur.
+    stage: sentences
+    tags:
+      - belanja
+  - frontId: Saya pesan kopi, tolong.
+    backNl: Ik wil graag een koffie.
+    stage: sentences
+    tags:
+      - cafe
+  - frontId: Saya mau bawa pulang.
+    backNl: Ik wil het meenemen.
+    stage: sentences
+    tags:
+      - cafe
+  - frontId: Meja untuk dua orang, tolong.
+    backNl: Een tafel voor twee, alstublieft.
+    stage: sentences
+    tags:
+      - cafe
+  - frontId: Di mana toiletnya?
+    backNl: Waar is het toilet?
+    stage: sentences
+    tags:
+      - arah
+  - frontId: Lurus saja, lalu ke kiri.
+    backNl: Rechtdoor en dan links.
+    stage: sentences
+    tags:
+      - arah
+  - frontId: Apakah jauh dari sini?
+    backNl: Is het ver vanaf hier?
+    stage: sentences
+    tags:
+      - arah
+  - frontId: Di sebelah stasiun.
+    backNl: Naast het station.
+    stage: sentences
+    tags:
+      - arah
+  - frontId: Bisakah Anda tunjukkan jalannya?
+    backNl: Kunt u de weg wijzen?
+    stage: sentences
+    tags:
+      - arah
+  - frontId: Saya tersesat.
+    backNl: Ik ben verdwaald.
+    stage: sentences
+    tags:
+      - arah

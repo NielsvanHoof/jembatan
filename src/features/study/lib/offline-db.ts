@@ -4,7 +4,11 @@
  */
 
 import type { StudyDirection } from "@/db/schema";
-import type { OfflineSession, PendingReview } from "@/features/study/types";
+import type {
+  CardStage,
+  OfflineSession,
+  PendingReview,
+} from "@/features/study/types";
 import { calendarDayKey } from "@/lib/habit";
 
 const DB_NAME = "jembatan-offline";
@@ -42,13 +46,16 @@ export function sessionCacheKey(input: {
   deckSlug: string;
   direction: StudyDirection;
   tag?: string;
+  stage?: CardStage;
   practiceAll: boolean;
   dayKey?: string;
 }): string {
   const day = input.dayKey ?? calendarDayKey(new Date());
   const tag = input.tag ?? "all";
+  // Include outing level so words/sentences caches stay separate.
+  const stage = input.stage ?? "any";
   const mode = input.practiceAll ? "practice" : "due";
-  return `${day}|${input.deckSlug}|${input.direction}|${tag}|${mode}`;
+  return `${day}|${input.deckSlug}|${input.direction}|${tag}|${stage}|${mode}`;
 }
 
 /** Persist today’s due (or practice) queue for offline reopen. */
@@ -64,6 +71,7 @@ export async function saveOfflineSession(
     deckSlug: session.deckSlug,
     direction: session.direction,
     tag: session.tag,
+    stage: session.stage,
     practiceAll: session.practiceAll,
     cards: session.cards,
     habit: session.habit,
@@ -83,6 +91,7 @@ export async function loadOfflineSession(input: {
   deckSlug: string;
   direction: StudyDirection;
   tag?: string;
+  stage?: CardStage;
   practiceAll: boolean;
 }): Promise<OfflineSession | null> {
   const key = sessionCacheKey(input);
